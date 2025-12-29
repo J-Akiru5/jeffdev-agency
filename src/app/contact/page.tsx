@@ -17,16 +17,32 @@ import { cn } from '@/lib/utils';
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate submission (replace with Server Action)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      subject: formData.get('subject') as string,
+      message: formData.get('message') as string,
+    };
+
+    // Import the Server Action dynamically to avoid client-side bundle
+    const { submitContactForm } = await import('@/app/actions/contact');
+    const result = await submitContactForm(data);
 
     setIsSubmitting(false);
-    setIsSubmitted(true);
+
+    if (result.success) {
+      setIsSubmitted(true);
+    } else {
+      setError(result.message);
+    }
   };
 
   return (
@@ -124,7 +140,13 @@ export default function ContactPage() {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <>
+                      {error && (
+                        <div className="mb-6 rounded-md border border-red-500/20 bg-red-500/10 p-4">
+                          <p className="text-sm text-red-400">{error}</p>
+                        </div>
+                      )}
+                      <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Name */}
                     <div>
                       <label
@@ -221,7 +243,8 @@ export default function ContactPage() {
                         )}
                       </span>
                     </button>
-                  </form>
+                      </form>
+                    </>
                 )}
               </div>
             </div>

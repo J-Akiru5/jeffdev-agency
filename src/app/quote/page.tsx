@@ -51,6 +51,7 @@ export default function QuotePage() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<FormData>({
     projectType: '',
     budget: '',
@@ -74,10 +75,20 @@ export default function QuotePage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // TODO: Replace with Server Action
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setError(null);
+
+    const { submitQuoteForm } = await import('@/app/actions/quote');
+    const result = await submitQuoteForm(data);
+
     setIsSubmitting(false);
-    setIsSubmitted(true);
+
+    if (result.success) {
+      setIsSubmitted(true);
+    } else {
+      setError(result.message);
+      // Scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   if (isSubmitted) {
@@ -146,6 +157,13 @@ export default function QuotePage() {
                 <span>Contact</span>
               </div>
             </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="mb-8 rounded-md border border-red-500/20 bg-red-500/10 p-4">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
 
             {/* Step 1: Project Type */}
             {step === 1 && (
