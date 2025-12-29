@@ -59,7 +59,7 @@ export async function submitContactForm(data: ContactFormData) {
       return {
         success: false,
         message: 'Validation error',
-        errors: error.errors,
+        errors: error.issues,
       };
     }
 

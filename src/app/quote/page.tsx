@@ -78,7 +78,8 @@ export default function QuotePage() {
     setError(null);
 
     const { submitQuoteForm } = await import('@/app/actions/quote');
-    const result = await submitQuoteForm(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await submitQuoteForm(data as any);
 
     setIsSubmitting(false);
 

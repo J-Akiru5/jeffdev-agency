@@ -64,6 +64,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  themeColor: '#1c2124',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 /**

@@ -20,15 +20,15 @@ import {
 const quoteSchema = z.object({
   // Step 1: Project Type
   projectType: z.enum(['web', 'saas', 'mobile', 'ai', 'other'], {
-    errorMap: () => ({ message: 'Please select a project type' }),
+    message: 'Please select a project type',
   }),
   
   // Step 2: Budget & Timeline
   budget: z.enum(['50k-100k', '100k-250k', '250k-500k', '500k+'], {
-    errorMap: () => ({ message: 'Please select a budget range' }),
+    message: 'Please select a budget range',
   }),
   timeline: z.enum(['1-2-weeks', '1-month', '2-3-months', 'flexible'], {
-    errorMap: () => ({ message: 'Please select a timeline' }),
+    message: 'Please select a timeline',
   }),
   
   // Step 3: Contact Info
@@ -74,7 +74,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
       return {
         success: false,
         message: 'Validation error',
-        errors: error.errors,
+        errors: error.issues,
       };
     }
 

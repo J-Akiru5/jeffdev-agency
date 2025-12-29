@@ -22,10 +22,6 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      if (!auth) {
-        throw new Error('Firebase auth not initialized');
-      }
-
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       

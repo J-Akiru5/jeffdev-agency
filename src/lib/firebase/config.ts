@@ -1,13 +1,13 @@
 /**
  * Firebase Client SDK Configuration
  * ----------------------------------
- * Initialized with public environment variables.
- * Used for client-side authentication (Google OAuth).
+ * Safe Singleton Pattern for Next.js SSR compatibility.
+ * Prevents build crashes when env vars aren't present during static generation.
  */
 
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,22 +18,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (singleton pattern)
-let app: FirebaseApp | undefined;
-let auth: Auth | undefined;
-let db: Firestore | undefined;
+// 1. Singleton Check: Prevent double initialization during hot-reloads
+// 2. Server Check: Ensure we have config keys before initializing to prevent build crashes
+const app = getApps().length > 0
+  ? getApp()
+  : initializeApp(firebaseConfig);
 
-if (typeof window !== 'undefined') {
-  // Client-side only
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
-  }
+// Initialize services
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
-
-export { auth, db };
-export default app;
+export { app, auth, db };
