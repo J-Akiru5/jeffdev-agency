@@ -113,7 +113,7 @@ export function Services() {
         {/* Section Header */}
         <div ref={headerRef} className="mx-auto max-w-2xl text-center">
           <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-            // Services
+            {"// Services"}
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
             Productized Solutions for

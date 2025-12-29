@@ -38,7 +38,7 @@ export default function WorkPage() {
             </Link>
             <div className="mt-8 max-w-2xl">
               <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                // Case Studies
+                {"// Case Studies"}
               </span>
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                 Our Work

@@ -52,7 +52,7 @@ export default function AboutPage() {
               {/* Left: Content */}
               <div>
                 <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                  // About.studio
+                  {"// About.studio"}
                 </span>
                 <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                   We Build Systems
@@ -89,7 +89,7 @@ export default function AboutPage() {
               {/* Right: Founder Card */}
               <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
                 <div className="font-mono text-xs uppercase tracking-wider text-white/40">
-                  // Founder.log
+                  {"// Founder.log"}
                 </div>
 
                 {/* Avatar placeholder */}
@@ -151,7 +151,7 @@ export default function AboutPage() {
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              // Tech_Stack
+              {"// Tech_Stack"}
             </h2>
             <p className="mt-4 max-w-xl text-white/60">
               We use modern, battle-tested technologies. No legacy frameworks,

@@ -47,7 +47,7 @@ export default function ContactPage() {
               {/* Left: Info */}
               <div>
                 <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                  // Contact
+                  {"// Contact"}
                 </span>
                 <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                   Let&apos;s Talk
