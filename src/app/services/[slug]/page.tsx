@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
-import { services, getServiceBySlug, getAllServiceSlugs } from '@/data/services';
+import { getServiceBySlug, getServices } from '@/lib/data';
+import { getIcon } from '@/lib/icons';
 import type { Metadata } from 'next';
 
 /**
@@ -12,6 +13,7 @@ import type { Metadata } from 'next';
  * -------------------
  * Individual service with full description,
  * features, deliverables, and investment info.
+ * Fetches data from Firestore.
  */
 
 interface ServicePageProps {
@@ -19,14 +21,15 @@ interface ServicePageProps {
 }
 
 export async function generateStaticParams() {
-  return getAllServiceSlugs().map((slug) => ({ slug }));
+  const services = await getServices();
+  return services.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
 
   if (!service) {
     return { title: 'Service Not Found' };
@@ -40,14 +43,19 @@ export async function generateMetadata({
 
 export default async function ServicePage({ params }: ServicePageProps) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
 
   if (!service) {
     notFound();
   }
 
   // Get other services for cross-linking
-  const otherServices = services.filter((s) => s.id !== service.id).slice(0, 2);
+  const allServices = await getServices();
+  const otherServices = allServices
+    .filter((s) => s.slug !== service.slug)
+    .slice(0, 2);
+
+  const Icon = getIcon(service.icon);
 
   return (
     <>
@@ -68,7 +76,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               {/* Left: Content */}
               <div>
                 <div className="inline-flex rounded-md border border-white/10 bg-white/5 p-3">
-                  <service.icon className="h-8 w-8 text-cyan-400" />
+                  <Icon className="h-8 w-8 text-cyan-400" />
                 </div>
 
                 <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
@@ -162,24 +170,27 @@ export default async function ServicePage({ params }: ServicePageProps) {
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-white">Other Services</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
-              {otherServices.map((s) => (
-                <Link
-                  key={s.id}
-                  href={`/services/${s.slug}`}
-                  className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
-                >
-                  <div className="rounded-md border border-white/10 bg-white/5 p-2">
-                    <s.icon className="h-5 w-5 text-cyan-400" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-white">{s.title}</div>
-                    <div className="mt-0.5 text-sm text-white/50">
-                      {s.tagline}
+              {otherServices.map((s) => {
+                const OtherIcon = getIcon(s.icon);
+                return (
+                  <Link
+                    key={s.slug}
+                    href={`/services/${s.slug}`}
+                    className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
+                  >
+                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                      <OtherIcon className="h-5 w-5 text-cyan-400" />
                     </div>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
-                </Link>
-              ))}
+                    <div className="flex-1">
+                      <div className="font-semibold text-white">{s.title}</div>
+                      <div className="mt-0.5 text-sm text-white/50">
+                        {s.tagline}
+                      </div>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

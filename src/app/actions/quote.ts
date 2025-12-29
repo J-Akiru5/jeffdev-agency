@@ -16,6 +16,7 @@ import {
   quoteEmailTemplate,
   EMAIL_ADDRESSES,
 } from '@/lib/email';
+import { generateQuoteRef } from '@/lib/ref-generator';
 
 const quoteSchema = z.object({
   // Step 1: Project Type
@@ -45,9 +46,13 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Validate input
     const validated = quoteSchema.parse(data);
 
+    // Generate unique reference number
+    const refNo = generateQuoteRef();
+
     // Save to Firestore
     const docRef = await db.collection('quotes').add({
       ...validated,
+      refNo,
       status: 'new',
       closedReason: null,
       createdAt: new Date().toISOString(),
@@ -84,3 +89,45 @@ export async function submitQuoteForm(data: QuoteFormData) {
     };
   }
 }
+
+/**
+ * Update quote status (admin action)
+ */
+export async function updateQuoteStatus(
+  quoteId: string,
+  status: 'new' | 'contacted' | 'in-progress' | 'closed'
+) {
+  try {
+    const { logAuditEvent } = await import('@/lib/audit');
+
+    const docRef = db.collection('quotes').doc(quoteId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return { success: false, error: 'Quote not found' };
+    }
+
+    const oldStatus = doc.data()?.status;
+
+    await docRef.update({
+      status,
+      updatedAt: new Date().toISOString(),
+    });
+
+    await logAuditEvent({
+      action: 'STATUS_CHANGE',
+      resource: 'quotes',
+      resourceId: quoteId,
+      details: { oldStatus, newStatus: status },
+    });
+
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/admin/quotes');
+
+    return { success: true };
+  } catch (error) {
+    console.error('[UPDATE QUOTE STATUS ERROR]', error);
+    return { success: false, error: 'Failed to update status' };
+  }
+}
+

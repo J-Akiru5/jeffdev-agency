@@ -1,41 +1,14 @@
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User, Mail, FileText } from 'lucide-react';
-import { db } from '@/lib/firebase/admin';
+import { ArrowLeft, User, Mail, FileText } from 'lucide-react';
+import { getMessages } from '@/lib/data';
+import { MessageStatusSelector } from '@/components/admin/message-status-selector';
 
 /**
  * Admin Messages Page
  * -------------------
- * View all contact form submissions from Firestore.
- * Server Component - fetches data on server.
+ * View all contact form submissions with status management.
+ * Server Component with client status selector.
  */
-
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  status: 'new' | 'read' | 'responded';
-  createdAt: string;
-}
-
-async function getMessages(): Promise<Message[]> {
-  try {
-    const snapshot = await db
-      .collection('messages')
-      .orderBy('createdAt', 'desc')
-      .limit(50)
-      .get();
-
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Message[];
-  } catch (error) {
-    console.error('[FETCH MESSAGES ERROR]', error);
-    return [];
-  }
-}
 
 export default async function AdminMessagesPage() {
   const messages = await getMessages();
@@ -69,18 +42,11 @@ export default async function AdminMessagesPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`inline-flex rounded-sm px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${
-                          msg.status === 'new'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : msg.status === 'read'
-                            ? 'bg-cyan-500/10 text-cyan-400'
-                            : 'bg-purple-500/10 text-purple-400'
-                        }`}
-                      >
-                        {msg.status}
-                      </span>
+                    <div className="flex items-center gap-4">
+                      <MessageStatusSelector
+                        messageId={msg.id!}
+                        currentStatus={msg.status}
+                      />
                       <span className="font-mono text-xs text-white/40">
                         {new Date(msg.createdAt).toLocaleDateString()}
                       </span>

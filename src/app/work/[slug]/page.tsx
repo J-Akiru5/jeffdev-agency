@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowUpRight, Quote } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
-import { projects, getProjectBySlug, getAllProjectSlugs } from '@/data/projects';
+import { getProjectBySlug, getProjects } from '@/lib/data';
 import type { Metadata } from 'next';
 
 /**
@@ -12,6 +12,7 @@ import type { Metadata } from 'next';
  * -------------------
  * Individual case study with challenge, solution,
  * results, and testimonial.
+ * Fetches data from Firestore.
  */
 
 interface ProjectPageProps {
@@ -19,14 +20,15 @@ interface ProjectPageProps {
 }
 
 export async function generateStaticParams() {
-  return getAllProjectSlugs().map((slug) => ({ slug }));
+  const projects = await getProjects();
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     return { title: 'Project Not Found' };
@@ -40,14 +42,17 @@ export async function generateMetadata({
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     notFound();
   }
 
   // Get other projects for cross-linking
-  const otherProjects = projects.filter((p) => p.id !== project.id).slice(0, 2);
+  const allProjects = await getProjects();
+  const otherProjects = allProjects
+    .filter((p) => p.slug !== project.slug)
+    .slice(0, 2);
 
   return (
     <>
@@ -168,7 +173,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               {otherProjects.map((p) => (
                 <Link
-                  key={p.id}
+                  key={p.slug}
                   href={`/work/${p.slug}`}
                   className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
                 >

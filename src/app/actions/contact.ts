@@ -69,3 +69,45 @@ export async function submitContactForm(data: ContactFormData) {
     };
   }
 }
+
+/**
+ * Update message status (admin action)
+ */
+export async function updateMessageStatus(
+  messageId: string,
+  status: 'new' | 'read' | 'responded'
+) {
+  try {
+    const { logAuditEvent } = await import('@/lib/audit');
+
+    const docRef = db.collection('messages').doc(messageId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return { success: false, error: 'Message not found' };
+    }
+
+    const oldStatus = doc.data()?.status;
+
+    await docRef.update({
+      status,
+      updatedAt: new Date().toISOString(),
+    });
+
+    await logAuditEvent({
+      action: 'STATUS_CHANGE',
+      resource: 'messages',
+      resourceId: messageId,
+      details: { oldStatus, newStatus: status },
+    });
+
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/admin/messages');
+
+    return { success: true };
+  } catch (error) {
+    console.error('[UPDATE MESSAGE STATUS ERROR]', error);
+    return { success: false, error: 'Failed to update status' };
+  }
+}
+

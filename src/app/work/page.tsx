@@ -3,13 +3,14 @@ import { ArrowUpRight, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
-import { projects, getFeaturedProjects } from '@/data/projects';
+import { getProjects, getFeaturedProjects } from '@/lib/data';
 import type { Metadata } from 'next';
 
 /**
  * Work Page
  * ---------
  * Case studies and portfolio projects.
+ * Fetches data from Firestore.
  */
 
 export const metadata: Metadata = {
@@ -18,9 +19,10 @@ export const metadata: Metadata = {
     'Case studies and success stories. See how we help startups and enterprises build high-performance web systems that drive growth.',
 };
 
-export default function WorkPage() {
-  const featuredProjects = getFeaturedProjects();
-  const otherProjects = projects.filter((p) => !p.featured);
+export default async function WorkPage() {
+  const allProjects = await getProjects();
+  const featuredProjects = await getFeaturedProjects();
+  const otherProjects = allProjects.filter((p) => !p.featured);
 
   return (
     <>
@@ -60,7 +62,7 @@ export default function WorkPage() {
             <div className="mt-6 grid gap-6">
               {featuredProjects.map((project) => (
                 <Link
-                  key={project.id}
+                  key={project.slug}
                   href={`/work/${project.slug}`}
                   className="group relative overflow-hidden rounded-md border border-white/[0.08] bg-white/[0.02] transition-all duration-300 hover:border-white/[0.15] hover:bg-white/[0.04]"
                 >
@@ -131,7 +133,7 @@ export default function WorkPage() {
               <div className="mt-6 grid gap-6 md:grid-cols-2">
                 {otherProjects.map((project) => (
                   <Link
-                    key={project.id}
+                    key={project.slug}
                     href={`/work/${project.slug}`}
                     className="group flex items-start gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
                   >
