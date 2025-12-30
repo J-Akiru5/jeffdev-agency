@@ -1,121 +1,142 @@
 'use server';
 
 /**
- * Services CRUD Actions
- * ---------------------
- * Server actions for managing services in Firestore.
+ * Services Server Actions
+ * -----------------------
+ * CRUD operations for agency services with pricing tiers.
  */
 
 import { db } from '@/lib/firebase/admin';
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
-import type { FirestoreService } from '@/types/firestore';
+import type { Service } from '@/types/services';
 import { logAuditEvent } from '@/lib/audit';
 
-// Validation schema
-const serviceSchema = z.object({
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens'),
-  icon: z.string().min(1),
-  title: z.string().min(1).max(100),
-  tagline: z.string().min(1).max(200),
-  description: z.string().min(1).max(1000),
-  features: z.array(z.string()).min(1).max(10),
-  deliverables: z.array(z.string()).min(1).max(10),
-  investment: z.object({
-    starting: z.string().min(1),
-    timeline: z.string().min(1),
-  }),
-  order: z.number().int().min(1),
-});
+const COLLECTION = 'services';
 
-export type ServiceFormData = z.infer<typeof serviceSchema>;
+/**
+ * Get all services
+ */
+export async function getServices(): Promise<Service[]> {
+  try {
+    const snapshot = await db
+      .collection(COLLECTION)
+      .orderBy('order', 'asc')
+      .get();
 
-interface ActionResult {
-  success: boolean;
-  error?: string;
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Service[];
+  } catch (error) {
+    console.error('[GET SERVICES ERROR]', error);
+    return [];
+  }
+}
+
+/**
+ * Get published services only (for public pages)
+ */
+export async function getPublishedServices(): Promise<Service[]> {
+  try {
+    const snapshot = await db
+      .collection(COLLECTION)
+      .where('status', '==', 'published')
+      .orderBy('order', 'asc')
+      .get();
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Service[];
+  } catch (error) {
+    console.error('[GET PUBLISHED SERVICES ERROR]', error);
+    return [];
+  }
+}
+
+/**
+ * Get service by slug
+ */
+export async function getServiceBySlug(slug: string): Promise<Service | null> {
+  try {
+    const snapshot = await db
+      .collection(COLLECTION)
+      .where('slug', '==', slug)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+
+    return {
+      id: snapshot.docs[0].id,
+      ...snapshot.docs[0].data(),
+    } as Service;
+  } catch (error) {
+    console.error('[GET SERVICE BY SLUG ERROR]', error);
+    return null;
+  }
 }
 
 /**
  * Create a new service
  */
-export async function createService(data: ServiceFormData): Promise<ActionResult> {
+export async function createService(
+  data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const validated = serviceSchema.parse(data);
-    
-    // Check if slug already exists
-    const existing = await db.collection('services').doc(validated.slug).get();
-    if (existing.exists) {
-      return { success: false, error: 'A service with this slug already exists' };
+    // Check for duplicate slug
+    const existing = await getServiceBySlug(data.slug);
+    if (existing) {
+      return { success: false, error: 'Service with this slug already exists' };
     }
-    
-    await db.collection('services').doc(validated.slug).set(validated);
-    
+
+    const service: Omit<Service, 'id'> = {
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const docRef = await db.collection(COLLECTION).add(service);
+
     await logAuditEvent({
       action: 'CREATE',
       resource: 'services',
-      resourceId: validated.slug,
-      details: { title: validated.title },
+      resourceId: docRef.id,
+      details: { name: data.name, slug: data.slug },
     });
-    
-    revalidatePath('/services');
-    revalidatePath('/admin/services');
-    
-    return { success: true };
+
+    return { success: true, id: docRef.id };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
     console.error('[CREATE SERVICE ERROR]', error);
     return { success: false, error: 'Failed to create service' };
   }
 }
 
 /**
- * Update an existing service
+ * Update a service
  */
 export async function updateService(
-  slug: string,
-  data: ServiceFormData
-): Promise<ActionResult> {
+  id: string,
+  data: Partial<Service>
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const validated = serviceSchema.parse(data);
-    
-    const existing = await db.collection('services').doc(slug).get();
-    if (!existing.exists) {
-      return { success: false, error: 'Service not found' };
-    }
-    
-    // If slug changed, delete old doc and create new
-    if (slug !== validated.slug) {
-      const newExists = await db.collection('services').doc(validated.slug).get();
-      if (newExists.exists) {
-        return { success: false, error: 'A service with the new slug already exists' };
-      }
-      await db.collection('services').doc(slug).delete();
-      await db.collection('services').doc(validated.slug).set(validated);
-    } else {
-      await db.collection('services').doc(slug).set(validated, { merge: true });
-    }
-    
+    // Remove protected fields
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _id, createdAt: _createdAt, ...updateData } = data;
+
+    await db.collection(COLLECTION).doc(id).update({
+      ...updateData,
+      updatedAt: new Date().toISOString(),
+    });
+
     await logAuditEvent({
       action: 'UPDATE',
       resource: 'services',
-      resourceId: validated.slug,
-      details: { title: validated.title, oldSlug: slug !== validated.slug ? slug : undefined },
+      resourceId: id,
+      details: { fields: Object.keys(updateData) },
     });
-    
-    revalidatePath('/services');
-    revalidatePath('/admin/services');
-    revalidatePath(`/services/${slug}`);
-    if (slug !== validated.slug) {
-      revalidatePath(`/services/${validated.slug}`);
-    }
-    
+
     return { success: true };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
     console.error('[UPDATE SERVICE ERROR]', error);
     return { success: false, error: 'Failed to update service' };
   }
@@ -124,29 +145,44 @@ export async function updateService(
 /**
  * Delete a service
  */
-export async function deleteService(slug: string): Promise<ActionResult> {
+export async function deleteService(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const existing = await db.collection('services').doc(slug).get();
-    if (!existing.exists) {
-      return { success: false, error: 'Service not found' };
-    }
-    
-    const data = existing.data() as FirestoreService;
-    await db.collection('services').doc(slug).delete();
-    
+    await db.collection(COLLECTION).doc(id).delete();
+
     await logAuditEvent({
       action: 'DELETE',
       resource: 'services',
-      resourceId: slug,
-      details: { title: data.title },
+      resourceId: id,
     });
-    
-    revalidatePath('/services');
-    revalidatePath('/admin/services');
-    
+
     return { success: true };
   } catch (error) {
     console.error('[DELETE SERVICE ERROR]', error);
     return { success: false, error: 'Failed to delete service' };
+  }
+}
+
+/**
+ * Reorder services
+ */
+export async function reorderServices(
+  orderedIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const batch = db.batch();
+
+    orderedIds.forEach((id, index) => {
+      const ref = db.collection(COLLECTION).doc(id);
+      batch.update(ref, { order: index, updatedAt: new Date().toISOString() });
+    });
+
+    await batch.commit();
+
+    return { success: true };
+  } catch (error) {
+    console.error('[REORDER SERVICES ERROR]', error);
+    return { success: false, error: 'Failed to reorder services' };
   }
 }

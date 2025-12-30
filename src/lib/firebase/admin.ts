@@ -37,5 +37,5 @@ if (!getApps().length) {
 auth = getAuth(app);
 db = getFirestore(app);
 
-export { auth, db };
+export { auth, auth as adminAuth, db };
 export default app;
