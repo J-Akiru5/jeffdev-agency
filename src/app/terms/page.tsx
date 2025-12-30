@@ -28,7 +28,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="mt-2 font-mono text-xs text-white/40">
-              Last updated: December 2024
+              Last updated: December 2025
             </p>
 
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
