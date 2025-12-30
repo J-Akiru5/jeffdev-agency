@@ -7,16 +7,20 @@
  */
 
 import Link from 'next/link';
-import { Bell, Search } from 'lucide-react';
-import { toast } from 'sonner';
+import { Search } from 'lucide-react';
+import { NotificationPopover } from './notification-popover';
+import { useUser } from '@/contexts/user-context';
 
 export function AdminHeader() {
-  // TODO: Get user from context
-  const user = {
-    displayName: 'Jeff Martinez',
-    email: 'jeff@jeffdev.studio',
+  const { user, loading } = useUser();
+
+  // Fallback while loading
+  const displayUser = user || {
+    uid: '',
+    displayName: 'Loading...',
+    email: '',
     photoURL: null,
-    role: 'founder',
+    role: 'employee' as const,
   };
 
   return (
@@ -36,13 +40,7 @@ export function AdminHeader() {
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        <button
-          onClick={() => toast.info('Notifications module coming soon')}
-          className="relative rounded-md p-2 text-white/40 transition-colors hover:bg-white/5 hover:text-white"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-cyan-400" />
-        </button>
+        {displayUser.uid && <NotificationPopover userId={displayUser.uid} />}
 
         {/* User - Clickable to Profile */}
         <Link
@@ -50,15 +48,25 @@ export function AdminHeader() {
           className="flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
         >
           <div className="text-right">
-            <div className="text-sm font-medium text-white">{user.displayName}</div>
+            <div className="text-sm font-medium text-white">
+              {loading ? 'Loading...' : displayUser.displayName}
+            </div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-              {user.role}
+              {displayUser.role}
             </div>
           </div>
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
+          {displayUser.photoURL ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={displayUser.photoURL}
+              alt={displayUser.displayName}
+              className="h-9 w-9 rounded-full object-cover"
+            />
+          ) : (
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
+          )}
         </Link>
       </div>
     </header>
   );
 }
-

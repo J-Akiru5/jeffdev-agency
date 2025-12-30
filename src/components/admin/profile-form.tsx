@@ -27,7 +27,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     displayName: profile.displayName || '',
     photoURL: profile.photoURL || '',
     title: profile.title || '',
-    title: profile.title || '',
     bio: profile.bio || '',
     phone: profile.phone || '',
     location: profile.location || '',
@@ -111,10 +110,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     try {
       // 1. Get presigned URL
       const { getSignedUploadUrl } = await import('@/app/actions/upload');
-      const { url, fileUrl, error } = await getSignedUploadUrl(file.name, file.type);
+      const result = await getSignedUploadUrl(file.name, file.type);
 
-      if (error) throw new Error(error);
-      if (!url || !fileUrl) throw new Error('Failed to get upload URL');
+      if ('error' in result) throw new Error(result.error);
+
+      const { url, fileUrl } = result;
 
       // 2. Upload to R2
       const uploadRes = await fetch(url, {
