@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getAllUsers } from '@/app/actions/users';
+import { getInvites } from '@/app/actions/invites';
 import { UsersClient } from '@/components/admin/users-client';
 import { cookies } from 'next/headers';
 
@@ -19,8 +20,9 @@ async function getCurrentUserUid(): Promise<string> {
 
 export default async function AdminUsersPage() {
   const _ = await cookies(); // Ensure dynamic rendering
-  const [users, currentUserUid] = await Promise.all([
+  const [users, invites, currentUserUid] = await Promise.all([
     getAllUsers(),
+    getInvites(),
     getCurrentUserUid(),
   ]);
 
@@ -37,9 +39,11 @@ export default async function AdminUsersPage() {
       <div className="mt-8">
         <UsersClient
           users={users}
+          invites={invites}
           currentUserUid={currentUserUid}
         />
       </div>
     </div>
   );
 }
+

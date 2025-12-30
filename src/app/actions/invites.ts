@@ -42,7 +42,7 @@ export async function createInvite(
     projectId?: string;  // Optional project assignment
     projectName?: string;
   }
-): Promise<{ success: boolean; inviteId?: string; error?: string }> {
+): Promise<{ success: boolean; inviteId?: string; token?: string; error?: string }> {
   try {
     // Validate role (prevent creating Founder invites)
     if (data.role === 'founder') {
@@ -133,7 +133,7 @@ export async function createInvite(
       },
     });
 
-    return { success: true, inviteId: docRef.id };
+    return { success: true, inviteId: docRef.id, token };
   } catch (error) {
     console.error('[CREATE INVITE ERROR]', error);
     return { success: false, error: 'Failed to create invite' };
@@ -263,6 +263,70 @@ export async function revokeInvite(
   } catch (error) {
     console.error('[REVOKE INVITE ERROR]', error);
     return { success: false, error: 'Failed to revoke invite' };
+  }
+}
+
+/**
+ * Resend invite with new token and extended expiry
+ */
+export async function resendInvite(
+  inviteId: string
+): Promise<{ success: boolean; token?: string; error?: string }> {
+  try {
+    const inviteRef = db.collection(COLLECTION).doc(inviteId);
+    const inviteDoc = await inviteRef.get();
+
+    if (!inviteDoc.exists) {
+      return { success: false, error: 'Invite not found' };
+    }
+
+    const invite = inviteDoc.data() as UserInvite;
+
+    // Can only resend pending invites
+    if (invite.status !== 'pending') {
+      return { success: false, error: 'Can only resend pending invites' };
+    }
+
+    // Generate new token and extend expiry
+    const newToken = generateInviteToken();
+    const newExpiresAt = new Date();
+    newExpiresAt.setDate(newExpiresAt.getDate() + 7);
+
+    await inviteRef.update({
+      token: newToken,
+      expiresAt: newExpiresAt.toISOString(),
+    });
+
+    // Send new invite email
+    const inviteLink = `${BASE_URL}/auth/invite/${newToken}`;
+
+    try {
+      await sendEmail({
+        to: invite.email,
+        subject: `Reminder: You're invited to join JD Studio as ${invite.role}`,
+        html: inviteEmailTemplate({
+          email: invite.email,
+          role: invite.role,
+          inviteLink,
+          projectName: invite.projectName,
+          expiresAt: newExpiresAt.toISOString(),
+        }),
+      });
+    } catch (emailError) {
+      console.error('[RESEND INVITE EMAIL ERROR]', emailError);
+    }
+
+    await logAuditEvent({
+      action: 'UPDATE',
+      resource: 'users',
+      resourceId: inviteId,
+      details: { type: 'invite_resent', email: invite.email },
+    });
+
+    return { success: true, token: newToken };
+  } catch (error) {
+    console.error('[RESEND INVITE ERROR]', error);
+    return { success: false, error: 'Failed to resend invite' };
   }
 }
 

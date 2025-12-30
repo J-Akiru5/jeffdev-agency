@@ -46,9 +46,9 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
       invitedBy: inviterUid,
     });
 
-    if (result.success && result.inviteId) {
-      // Generate invite link (for now, show success - actual email would be sent)
-      const link = `${window.location.origin}/auth/invite/${result.inviteId}`;
+    if (result.success && result.token) {
+      // Generate invite link using the token (not inviteId!)
+      const link = `${window.location.origin}/auth/invite/${result.token}`;
       setInviteLink(link);
       router.refresh();
     } else {
