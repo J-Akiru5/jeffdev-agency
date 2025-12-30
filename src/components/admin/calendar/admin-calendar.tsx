@@ -156,6 +156,28 @@ export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
         .admin-calendar .fc-day-today {
           background-color: rgba(6, 182, 212, 0.05) !important;
         }
+
+        @media (max-width: 768px) {
+          .admin-calendar .fc-header-toolbar {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          
+          .admin-calendar .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+          }
+          
+          .admin-calendar .fc-toolbar-title {
+            font-size: 1.1rem;
+          }
+
+          .admin-calendar .fc-button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+          }
+        }
       `}</style>
     </div>
   );
