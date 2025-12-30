@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token');
   
   if (!token) {
-    return NextResponse.redirect(new URL('/forbidden', request.url));
+    // Redirect to homepage with error message - not /forbidden
+    // No token means invalid link, not access denied
+    return NextResponse.redirect(new URL('/?error=invalid_invite', request.url));
   }
   
   // For now, redirect to login with the token in state
