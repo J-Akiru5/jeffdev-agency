@@ -45,6 +45,23 @@ interface ActionResult {
 }
 
 /**
+ * Get simple list of projects for dropdown selection
+ * Returns only slug and title for efficiency
+ */
+export async function getProjectsList(): Promise<{ slug: string; title: string }[]> {
+  try {
+    const snapshot = await db.collection('projects').orderBy('title').get();
+    return snapshot.docs.map((doc) => ({
+      slug: doc.id,
+      title: (doc.data() as FirestoreProject).title,
+    }));
+  } catch (error) {
+    console.error('[GET PROJECTS LIST ERROR]', error);
+    return [];
+  }
+}
+
+/**
  * Create a new project
  */
 export async function createProject(data: ProjectFormData): Promise<ActionResult> {

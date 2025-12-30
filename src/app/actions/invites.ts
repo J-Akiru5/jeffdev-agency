@@ -12,7 +12,7 @@ import type { UserRole } from '@/types/rbac';
 import type { UserInvite } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
 import { randomBytes } from 'crypto';
-import { sendEmail, inviteEmailTemplate } from '@/lib/email';
+import { sendEmail, inviteEmailTemplate, BRANDED_SENDER } from '@/lib/email';
 
 const COLLECTION = 'invites';
 const USERS_COLLECTION = 'users';
@@ -104,6 +104,7 @@ export async function createInvite(
     try {
       await sendEmail({
         to: data.email,
+        from: BRANDED_SENDER,
         subject: `You're invited to join JD Studio as ${data.role}`,
         html: inviteEmailTemplate({
           email: data.email,
@@ -303,7 +304,8 @@ export async function resendInvite(
     try {
       await sendEmail({
         to: invite.email,
-        subject: `Reminder: You're invited to join JD Studio as ${invite.role}`,
+        from: BRANDED_SENDER,
+        subject: `Action Required: Accept Your Invitation to JD Studio`,
         html: inviteEmailTemplate({
           email: invite.email,
           role: invite.role,

@@ -4,18 +4,25 @@
  * Invite User Modal
  * -----------------
  * Modal for sending magic link invites to new team members.
+ * Includes project selection (combobox) for Partner role.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Mail, Loader2, Send, Copy, Check } from 'lucide-react';
+import { X, Mail, Loader2, Send, Copy, Check, FolderOpen, ChevronDown } from 'lucide-react';
 import { createInvite } from '@/app/actions/invites';
+import { getProjectsList } from '@/app/actions/projects';
 import type { UserRole } from '@/types/rbac';
 
 interface InviteModalProps {
   isOpen: boolean;
   onClose: () => void;
   inviterUid: string;
+}
+
+interface Project {
+  slug: string;
+  title: string;
 }
 
 const roleOptions: { value: UserRole; label: string; description: string }[] = [
@@ -33,21 +40,68 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
   const [inviteLink, setInviteLink] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // Project combobox state
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectInput, setProjectInput] = useState('');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch projects when modal opens (for Partner role)
+  useEffect(() => {
+    if (isOpen) {
+      getProjectsList().then(setProjects);
+    }
+  }, [isOpen]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   if (!isOpen) return null;
+
+  // Filter projects based on input
+  const filteredProjects = projects.filter((p) =>
+    p.title.toLowerCase().includes(projectInput.toLowerCase())
+  );
+
+  const handleProjectSelect = (project: Project) => {
+    setSelectedProject(project);
+    setProjectInput(project.title);
+    setIsDropdownOpen(false);
+  };
+
+  const handleProjectInputChange = (value: string) => {
+    setProjectInput(value);
+    setSelectedProject(null); // Clear selection when typing custom
+    setIsDropdownOpen(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
+    // Determine project info to send
+    const projectId = selectedProject?.slug || undefined;
+    const projectName = projectInput.trim() || undefined;
+
     const result = await createInvite({
       email,
       role,
       invitedBy: inviterUid,
+      projectId: role === 'partner' ? projectId : undefined,
+      projectName: role === 'partner' ? projectName : undefined,
     });
 
     if (result.success && result.token) {
-      // Generate invite link using the token (not inviteId!)
       const link = `${window.location.origin}/auth/invite/${result.token}`;
       setInviteLink(link);
       router.refresh();
@@ -69,6 +123,8 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
     setRole('employee');
     setError('');
     setInviteLink('');
+    setProjectInput('');
+    setSelectedProject(null);
     onClose();
   };
 
@@ -78,7 +134,7 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-lg border border-white/8 bg-[#0a0a0a] p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-lg border border-white/8 bg-[#0a0a0a] p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -100,7 +156,7 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
           <div className="space-y-4">
             <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 p-4">
               <p className="text-sm text-emerald-400">
-                Invite created successfully!
+                Invite created and email sent successfully!
               </p>
             </div>
 
@@ -192,6 +248,65 @@ export function InviteModal({ isOpen, onClose, inviterUid }: InviteModalProps) {
                 ))}
               </div>
             </div>
+
+              {/* Project Combobox - Only for Partner role */}
+              {role === 'partner' && (
+                <div ref={dropdownRef}>
+                  <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+                    Assign to Project (Optional)
+                  </label>
+                  <div className="relative">
+                    <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                    <input
+                      type="text"
+                      value={projectInput}
+                      onChange={(e) => handleProjectInputChange(e.target.value)}
+                      onFocus={() => setIsDropdownOpen(true)}
+                      placeholder="Select or type project name..."
+                      className="w-full rounded-md border border-white/10 bg-white/5 pl-10 pr-10 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-white/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
+                    >
+                      <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Dropdown */}
+                    {isDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full max-h-48 overflow-auto rounded-md border border-white/10 bg-[#111] shadow-lg">
+                        {filteredProjects.length > 0 ? (
+                          filteredProjects.map((project) => (
+                            <button
+                              key={project.slug}
+                              type="button"
+                              onClick={() => handleProjectSelect(project)}
+                              className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 ${selectedProject?.slug === project.slug
+                                  ? 'bg-emerald-500/10 text-emerald-400'
+                                  : 'text-white/70'
+                                }`}
+                            >
+                              {project.title}
+                            </button>
+                          ))
+                        ) : projectInput.trim() ? (
+                          <div className="px-3 py-2 text-sm text-white/50">
+                            New project: <span className="text-emerald-400">{projectInput}</span>
+                          </div>
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-white/40">
+                            No projects found. Type to create new.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-white/30">
+                    Select an existing project or type a new project name
+                  </p>
+                </div>
+              )}
 
             {/* Submit */}
             <button

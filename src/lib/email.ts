@@ -12,11 +12,19 @@ if (!process.env.RESEND_API_KEY) {
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
   contact: process.env.CONTACT_EMAIL || 'contact@jeffdev.studio',
   hire: process.env.HIRE_EMAIL || 'hire@jeffdev.studio',
   noreply: process.env.NOREPLY_EMAIL || 'noreply@jeffdev.studio',
 } as const;
+
+// Branded sender format for external emails
+export const BRANDED_SENDER = `JD Studio <${EMAIL_ADDRESSES.noreply}>`;
+
+// Base URL for assets in emails
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
 interface SendEmailParams {
   to: string | string[];
@@ -250,6 +258,7 @@ export function inviteEmailTemplate(data: {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #e5e5e5; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a;">
   <div style="background: linear-gradient(135deg, ${roleColor}20 0%, #1a1a1a 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
+    <img src="${LOGO_URL}" alt="JD Studio" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
     <h1 style="margin: 0 0 10px 0; color: white; font-size: 28px; font-weight: 700;">You're Invited!</h1>
     <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 16px;">Join the JD Studio team</p>
   </div>
