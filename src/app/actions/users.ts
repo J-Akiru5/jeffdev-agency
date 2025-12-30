@@ -127,6 +127,7 @@ export async function checkUsernameAvailable(
 
 /**
  * Get all users (for admin user management)
+ * Serializes Firestore Timestamps to ISO strings for client components
  */
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
@@ -135,12 +136,24 @@ export async function getAllUsers(): Promise<UserProfile[]> {
       .orderBy('createdAt', 'desc')
       .get();
 
-    return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
-      uid: doc.id,
-      ...doc.data(),
-    })) as UserProfile[];
+    return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const data = doc.data();
+
+      // Serialize Firestore Timestamps to ISO strings
+      return {
+        uid: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.()
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.()
+          ? data.updatedAt.toDate().toISOString()
+          : data.updatedAt || new Date().toISOString(),
+      } as UserProfile;
+    });
   } catch (error) {
     console.error('[GET ALL USERS ERROR]', error);
     return [];
   }
 }
+

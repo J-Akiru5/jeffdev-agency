@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Settings2, Palette, Bell, Shield, FileCode } from 'lucide-react';
 import { cookies } from 'next/headers';
+import { BootstrapButton } from '@/components/admin/bootstrap-button';
 
 /**
  * Admin Settings Page
@@ -122,6 +123,12 @@ export default async function AdminSettingsPage() {
               <p className="text-xs text-white/40 uppercase tracking-wider">Framework</p>
               <p className="mt-1 font-mono text-sm text-white">Next.js 15+</p>
             </div>
+          </div>
+
+          {/* Bootstrap Section */}
+          <div className="mt-6 pt-6 border-t border-white/6">
+            <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Account Setup</p>
+            <BootstrapButton />
           </div>
         </div>
       </div>
