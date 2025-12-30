@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
+import { ServiceInvestmentCard } from '@/components/services/service-investment-card';
 import { getServiceBySlug, getServices } from '@/lib/data';
 import { getIcon } from '@/lib/icons';
 import type { Metadata } from 'next';
@@ -111,38 +112,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 </div>
               </div>
 
-              {/* Right: Investment Card */}
-              <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
-                <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                  Investment
-                </h3>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-white">
-                    {service.investment.starting}
-                  </span>
-                  <span className="text-white/50">starting</span>
-                </div>
-                <div className="mt-2 text-sm text-white/50">
-                  Timeline: {service.investment.timeline}
-                </div>
-
-                <div className="mt-8 border-t border-white/[0.06] pt-8">
-                  <h4 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                    Deliverables
-                  </h4>
-                  <ul className="mt-4 space-y-3">
-                    {service.deliverables.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-start gap-3 text-sm text-white/70"
-                      >
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              {/* Right: Investment Card (Client Component for currency) */}
+              <ServiceInvestmentCard
+                investment={service.investment}
+                deliverables={service.deliverables}
+              />
             </div>
           </div>
         </section>

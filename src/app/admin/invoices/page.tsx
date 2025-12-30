@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ArrowLeft, Plus, Send, Eye, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { getInvoices } from '@/app/actions/invoice';
 import type { Invoice, InvoiceStatus } from '@/types/invoice';
+import { PriceDisplay } from '@/components/ui/price-display';
 
 export const dynamic = 'force-dynamic';
 
@@ -155,13 +156,16 @@ export default async function AdminInvoicesPage() {
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                         <p className="text-lg font-semibold text-white">
-                          {invoice.currency === 'USD' ? '$' : '₱'}
-                          {invoice.total.toLocaleString()}
+                          <PriceDisplay amount={invoice.total} sourceCurrency={invoice.currency} />
                         </p>
                         {invoice.balanceDue > 0 && invoice.balanceDue < invoice.total && (
-                          <p className="text-sm text-yellow-400">
-                            ${invoice.balanceDue.toLocaleString()} due
-                          </p>
+                          <div className="flex items-center justify-end text-sm text-yellow-400">
+                            <PriceDisplay
+                              amount={invoice.balanceDue}
+                              sourceCurrency={invoice.currency}
+                            />
+                            <span className="ml-1">due</span>
+                          </div>
                         )}
                       </div>
 

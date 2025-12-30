@@ -1,7 +1,8 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getInvoiceByRefNo } from '@/app/actions/invoice';
 import { PaymentButton } from '@/components/payments';
 import type { InvoiceStatus } from '@/types/invoice';
+import { PriceDisplay } from '@/components/ui/price-display';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,8 +87,7 @@ export default async function PublicPaymentPage({ params }: PageProps) {
                   {item.description} × {item.quantity}
                 </span>
                 <span className="text-white">
-                  {invoice.currency === 'USD' ? '$' : '₱'}
-                  {item.amount.toLocaleString()}
+                  <PriceDisplay amount={item.amount} sourceCurrency={invoice.currency} />
                 </span>
               </div>
             ))}
@@ -99,43 +99,42 @@ export default async function PublicPaymentPage({ params }: PageProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-white/50">
               <span>Subtotal</span>
-              <span>
-                {invoice.currency === 'USD' ? '$' : '₱'}
-                {invoice.subtotal.toLocaleString()}
-              </span>
+              <PriceDisplay amount={invoice.subtotal} sourceCurrency={invoice.currency} />
             </div>
             {invoice.tax && invoice.tax > 0 && (
               <div className="flex justify-between text-sm text-white/50">
                 <span>Tax</span>
-                <span>
-                  {invoice.currency === 'USD' ? '$' : '₱'}
-                  {invoice.tax.toLocaleString()}
-                </span>
+                <PriceDisplay amount={invoice.tax} sourceCurrency={invoice.currency} />
               </div>
             )}
             {invoice.discount && invoice.discount > 0 && (
               <div className="flex justify-between text-sm text-emerald-400">
                 <span>Discount</span>
-                <span>
-                  -{invoice.currency === 'USD' ? '$' : '₱'}
-                  {invoice.discount.toLocaleString()}
-                </span>
+                <div className="flex">
+                  -
+                  <PriceDisplay
+                    amount={invoice.discount}
+                    sourceCurrency={invoice.currency}
+                  />
+                </div>
               </div>
             )}
             <div className="flex justify-between pt-2 text-lg font-bold">
               <span className="text-white">Total</span>
               <span className="text-white">
-                {invoice.currency === 'USD' ? '$' : '₱'}
-                {invoice.total.toLocaleString()}
+                <PriceDisplay amount={invoice.total} sourceCurrency={invoice.currency} />
               </span>
             </div>
             {invoice.paidAmount > 0 && (
               <div className="flex justify-between text-sm text-emerald-400">
                 <span>Paid</span>
-                <span>
-                  -{invoice.currency === 'USD' ? '$' : '₱'}
-                  {invoice.paidAmount.toLocaleString()}
-                </span>
+                <div className="flex">
+                  -
+                  <PriceDisplay
+                    amount={invoice.paidAmount}
+                    sourceCurrency={invoice.currency}
+                  />
+                </div>
               </div>
             )}
             <div className="flex justify-between border-t border-white/10 pt-2 text-xl font-bold">
@@ -145,8 +144,7 @@ export default async function PublicPaymentPage({ params }: PageProps) {
                   invoice.balanceDue > 0 ? 'text-cyan-400' : 'text-emerald-400'
                 }
               >
-                {invoice.currency === 'USD' ? '$' : '₱'}
-                {invoice.balanceDue.toLocaleString()}
+                <PriceDisplay amount={invoice.balanceDue} sourceCurrency={invoice.currency} />
               </span>
             </div>
           </div>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SmoothScroll } from '@/components/providers/smooth-scroll';
+import { CurrencyProvider } from '@/contexts/currency-context';
 import { CookieConsent } from '@/components/cookie-consent';
 import { AnalyticsProvider } from '@/components/analytics-provider';
 import './globals.css';
@@ -133,9 +134,11 @@ export default function RootLayout({
 
         {/* Application Content */}
         <SmoothScroll>
-          <div className="relative z-10 min-h-screen flex flex-col">
-            {children}
-          </div>
+          <CurrencyProvider>
+            <div className="relative z-10 min-h-screen flex flex-col">
+              {children}
+            </div>
+          </CurrencyProvider>
         </SmoothScroll>
 
         {/* Vercel Analytics - Web Vitals Tracking */}

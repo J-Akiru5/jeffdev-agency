@@ -5,6 +5,9 @@ import { Globe, Cloud, Cpu, Sparkles, type LucideIcon } from 'lucide-react';
  * -------------
  * Centralized service definitions for consistency across pages.
  * Follows B2B investment-focused language.
+ *
+ * NOTE: All prices are stored as numbers in PHP (Philippine Peso).
+ * The CurrencyContext handles conversion to USD for international visitors.
  */
 
 export interface Service {
@@ -17,7 +20,8 @@ export interface Service {
   features: string[];
   deliverables: string[];
   investment: {
-    starting: string;
+    /** Base price in PHP (numeric for currency conversion) */
+    startingPrice: number;
     timeline: string;
   };
 }
@@ -46,7 +50,7 @@ export const services: Service[] = [
       '30-day post-launch support',
     ],
     investment: {
-      starting: '₱75,000',
+      startingPrice: 75000,
       timeline: '2-4 weeks',
     },
   },
@@ -74,7 +78,7 @@ export const services: Service[] = [
       'API documentation',
     ],
     investment: {
-      starting: '₱150,000',
+      startingPrice: 150000,
       timeline: '4-8 weeks',
     },
   },
@@ -102,7 +106,7 @@ export const services: Service[] = [
       'SLA guarantee',
     ],
     investment: {
-      starting: '₱50,000',
+      startingPrice: 50000,
       timeline: '1-2 weeks',
     },
   },
@@ -130,7 +134,7 @@ export const services: Service[] = [
       'Optimization recommendations',
     ],
     investment: {
-      starting: '₱100,000',
+      startingPrice: 100000,
       timeline: '2-4 weeks',
     },
   },

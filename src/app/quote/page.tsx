@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { PriceRangeDisplay } from '@/components/ui/price-display';
 import { cn } from '@/lib/utils';
 
 /**
@@ -13,6 +14,8 @@ import { cn } from '@/lib/utils';
  * Step 1: Project Type
  * Step 2: Budget & Timeline
  * Step 3: Contact Info
+ *
+ * Budget ranges use CurrencyContext for automatic localization.
  */
 
 const projectTypes = [
@@ -23,11 +26,14 @@ const projectTypes = [
   { id: 'other', label: 'Other', description: 'Custom project or consultation' },
 ];
 
+/**
+ * Budget ranges stored as PHP numeric values for currency conversion
+ */
 const budgetRanges = [
-  { id: '50k-100k', label: '₱50K – ₱100K', description: 'Small projects, MVPs' },
-  { id: '100k-250k', label: '₱100K – ₱250K', description: 'Medium complexity apps' },
-  { id: '250k-500k', label: '₱250K – ₱500K', description: 'Full-featured platforms' },
-  { id: '500k+', label: '₱500K+', description: 'Enterprise solutions' },
+  { id: '50k-100k', minPhp: 50000, maxPhp: 100000, description: 'Small projects, MVPs' },
+  { id: '100k-250k', minPhp: 100000, maxPhp: 250000, description: 'Medium complexity apps' },
+  { id: '250k-500k', minPhp: 250000, maxPhp: 500000, description: 'Full-featured platforms' },
+  { id: '500k+', minPhp: 500000, maxPhp: null, description: 'Enterprise solutions' },
 ];
 
 const timelines = [
@@ -184,7 +190,7 @@ export default function QuotePage() {
                         'w-full rounded-md border p-4 text-left transition-all',
                         data.projectType === type.id
                           ? 'border-cyan-500/50 bg-cyan-500/10'
-                          : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                          : 'border-white/10 bg-white/2 hover:border-white/20'
                       )}
                     >
                       <div className="font-semibold text-white">{type.label}</div>
@@ -220,10 +226,12 @@ export default function QuotePage() {
                           'rounded-md border p-4 text-left transition-all',
                           data.budget === range.id
                             ? 'border-cyan-500/50 bg-cyan-500/10'
-                            : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                            : 'border-white/10 bg-white/2 hover:border-white/20'
                         )}
                       >
-                        <div className="font-semibold text-white">{range.label}</div>
+                        <div className="font-semibold text-white">
+                          <PriceRangeDisplay minPhp={range.minPhp} maxPhp={range.maxPhp} />
+                        </div>
                         <div className="mt-0.5 text-sm text-white/50">
                           {range.description}
                         </div>
@@ -245,7 +253,7 @@ export default function QuotePage() {
                           'rounded-md border p-4 text-left transition-all',
                           data.timeline === tl.id
                             ? 'border-cyan-500/50 bg-cyan-500/10'
-                            : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                            : 'border-white/10 bg-white/2 hover:border-white/20'
                         )}
                       >
                         <div className="font-semibold text-white">{tl.label}</div>
