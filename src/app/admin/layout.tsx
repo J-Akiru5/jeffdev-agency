@@ -1,6 +1,7 @@
 import { AdminSidebar } from '@/components/admin/sidebar';
 import { AdminHeader } from '@/components/admin/header';
 import { UserProvider } from '@/contexts/user-context';
+import { Toaster } from 'sonner';
 
 /**
  * Admin Layout
@@ -17,6 +18,7 @@ export default function AdminLayout({
   return (
     <UserProvider>
       <div className="min-h-screen bg-void">
+        <Toaster position="bottom-right" theme="dark" />
         {/* Sidebar */}
         <AdminSidebar />
 

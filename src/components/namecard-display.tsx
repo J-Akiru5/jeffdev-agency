@@ -20,6 +20,26 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
 
   const accentColor = namecard.accentColor || '#06b6d4';
 
+  const getBackgroundStyle = () => {
+    const bg = namecard.background || 'gradient-dark';
+
+    switch (bg) {
+      case 'gradient-dark':
+        return 'bg-gradient-to-br from-gray-900 to-black';
+      case 'gradient-light':
+        return 'bg-gradient-to-br from-gray-100 to-white';
+      case 'glass-1':
+        return 'bg-white/10 backdrop-blur-md';
+      case 'glass-2':
+        return 'bg-black/40 backdrop-blur-xl';
+      default:
+        return 'bg-black'; // Fallback
+    }
+  };
+
+  const isHexBg = namecard.background?.startsWith('#');
+  const bgClass = !isHexBg ? getBackgroundStyle() : '';
+
   // Generate QR code on mount
   useEffect(() => {
     const generateQR = async () => {
@@ -66,9 +86,10 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
     <div className="relative w-full max-w-md">
       {/* Card */}
       <div
-        className="rounded-2xl border border-white/10 overflow-hidden"
+        className={`rounded-2xl border border-white/10 overflow-hidden ${bgClass}`}
         style={{
-          background: `linear-gradient(135deg, #0a0a0a 0%, ${accentColor}08 100%)`,
+          backgroundColor: isHexBg ? namecard.background : undefined,
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         }}
       >
         {/* Header with accent gradient */}

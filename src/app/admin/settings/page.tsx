@@ -54,6 +54,14 @@ const colorMap: Record<string, string> = {
   yellow: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 group-hover:bg-yellow-500/20',
 };
 
+const versionDisplay = {
+  version: '0.8.0',
+  stageBadge: {
+    label: 'Beta',
+    className: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+  }
+};
+
 export default async function AdminSettingsPage() {
   await cookies(); // Ensure dynamic rendering
 
@@ -97,7 +105,12 @@ export default async function AdminSettingsPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className="text-xs text-white/40 uppercase tracking-wider">Version</p>
-              <p className="mt-1 font-mono text-sm text-white">v2.0.0-alpha</p>
+              <div className="mt-1 flex items-center gap-2">
+                <p className="font-mono text-sm text-white">{versionDisplay.version}</p>
+                <span className={`rounded-sm px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${versionDisplay.stageBadge.className}`}>
+                  {versionDisplay.stageBadge.label}
+                </span>
+              </div>
             </div>
             <div>
               <p className="text-xs text-white/40 uppercase tracking-wider">Environment</p>

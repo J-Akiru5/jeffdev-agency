@@ -39,6 +39,13 @@ export interface UserProfile {
     showEmail: boolean;
     showPhone: boolean;
     accentColor?: string; // Custom accent color
+    background?: string; // Preset or image URL
+    socials?: {
+      linkedin?: boolean;
+      github?: boolean;
+      twitter?: boolean;
+      website?: boolean;
+    };
   };
 }
 
@@ -61,6 +68,7 @@ export interface PublicNamecard {
     website?: string;
   };
   accentColor?: string;
+  background?: string;
 }
 
 // =============================================================================

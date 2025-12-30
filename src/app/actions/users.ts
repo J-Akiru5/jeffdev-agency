@@ -53,8 +53,15 @@ export async function getPublicNamecard(username: string): Promise<PublicNamecar
       bio: user.bio,
       email: user.namecard?.showEmail ? user.email : undefined,
       phone: user.namecard?.showPhone ? user.phone : undefined,
-      social: user.social,
+      // Filter social links based on visibility settings
+      social: {
+        linkedin: user.namecard?.socials?.linkedin ? user.social?.linkedin : undefined,
+        github: user.namecard?.socials?.github ? user.social?.github : undefined,
+        twitter: user.namecard?.socials?.twitter ? user.social?.twitter : undefined,
+        website: user.namecard?.socials?.website ? user.social?.website : undefined,
+      },
       accentColor: user.namecard?.accentColor,
+      background: user.namecard?.background,
     };
 
     return namecard;

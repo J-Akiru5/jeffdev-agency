@@ -6,7 +6,9 @@
  * Top header bar with user info and quick actions.
  */
 
+import Link from 'next/link';
 import { Bell, Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function AdminHeader() {
   // TODO: Get user from context
@@ -34,13 +36,19 @@ export function AdminHeader() {
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        <button className="relative rounded-md p-2 text-white/40 transition-colors hover:bg-white/5 hover:text-white">
+        <button
+          onClick={() => toast.info('Notifications module coming soon')}
+          className="relative rounded-md p-2 text-white/40 transition-colors hover:bg-white/5 hover:text-white"
+        >
           <Bell className="h-5 w-5" />
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-cyan-400" />
         </button>
 
-        {/* User */}
-        <div className="flex items-center gap-3">
+        {/* User - Clickable to Profile */}
+        <Link
+          href="/admin/profile"
+          className="flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+        >
           <div className="text-right">
             <div className="text-sm font-medium text-white">{user.displayName}</div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">
@@ -48,8 +56,9 @@ export function AdminHeader() {
             </div>
           </div>
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
-        </div>
+        </Link>
       </div>
     </header>
   );
 }
+
