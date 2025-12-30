@@ -10,6 +10,10 @@ import { db } from '@/lib/firebase/admin';
 import type { UserProfile, PublicNamecard } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { sanitizeFirestoreData } from '@/lib/utils';
+// ... existing imports ...
+
+
 
 const COLLECTION = 'users';
 
@@ -136,26 +140,12 @@ export async function getAllUsers(): Promise<UserProfile[]> {
       .orderBy('createdAt', 'desc')
       .get();
 
-    return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+    return snapshot.docs.map((doc) => {
       const data = doc.data();
-
-      // Serialize Firestore Timestamps to ISO strings
-      const profile = {
-        uid: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.()
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()
-          ? data.updatedAt.toDate().toISOString()
-          : data.updatedAt || new Date().toISOString(),
-      } as UserProfile;
-
-      if (data.lastLoginAt?.toDate?.()) {
-        profile.lastLoginAt = data.lastLoginAt.toDate().toISOString();
-      }
-
-      return profile;
+      return sanitizeFirestoreData<UserProfile>({
+        uid: doc.id, 
+        ...data
+      });
     });
   } catch (error) {
     console.error('[GET ALL USERS ERROR]', error);

@@ -13,6 +13,7 @@ import type { UserInvite } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
 import { randomBytes } from 'crypto';
 import { sendEmail, inviteEmailTemplate, BRANDED_SENDER } from '@/lib/email';
+import { sanitizeFirestoreData } from '@/lib/utils';
 
 const COLLECTION = 'invites';
 const USERS_COLLECTION = 'users';
