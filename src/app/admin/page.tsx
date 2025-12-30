@@ -153,7 +153,7 @@ export default async function AdminDashboardPage() {
               <Link
                 key={quote.id}
                 href={`/admin/quotes?id=${quote.id}`}
-                className="flex items-center justify-between rounded-md bg-white/[0.02] p-3 transition-all hover:bg-white/[0.05]"
+                className="flex items-center justify-between rounded-md bg-white/2 p-3 transition-all hover:bg-white/5"
               >
                 <div>
                   <div className="text-sm font-medium text-white">{quote.name}</div>
@@ -192,7 +192,7 @@ export default async function AdminDashboardPage() {
             {upcomingEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex items-start gap-3 rounded-md bg-white/[0.02] p-3"
+                className="flex items-start gap-3 rounded-md bg-white/2 p-3"
               >
                 <div
                   className={`mt-0.5 h-2 w-2 rounded-full ${event.type === 'deadline'
