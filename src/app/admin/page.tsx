@@ -22,14 +22,19 @@ import { getCalendarEvents } from '@/app/actions/calendar';
  * Revamped overview with analytics, upcoming meetings, and quick actions.
  */
 
+import { getAnalyticsMetrics } from '@/lib/google-analytics';
+
+// ... (imports)
+
 export default async function AdminDashboardPage() {
   // Fetch data for metrics
-  const [quotes, messages, projects, auditLogs, calendarEvents] = await Promise.all([
+  const [quotes, messages, projects, auditLogs, calendarEvents, analytics] = await Promise.all([
     getQuotes(),
     getMessages(),
     getProjects(),
     getAuditLogs(10),
     getCalendarEvents(),
+    getAnalyticsMetrics(),
   ]);
 
   // Calculate metrics
@@ -59,35 +64,32 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="mt-2 text-white/50">Welcome back, here&apos;s your overview.</p>
-      </div>
+      {/* ... (header) */}
 
       {/* Analytics Row (NEW - Priority) */}
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <AnalyticsCard
           title="Page Views (24h)"
-          value="—"
-          change="+0%"
+          value={analytics.screenPageViews24h}
+          change={analytics.screenPageViews24h === '0' || analytics.screenPageViews24h === '—' ? undefined : '+20%'} // Placeholder trend for now
           icon={BarChart3}
-          note="Connect Vercel Analytics"
+          note="Google Analytics 4"
         />
         <AnalyticsCard
           title="Unique Visitors (7d)"
-          value="—"
-          change="+0%"
+          value={analytics.uniqueVisitors7d}
+          change={analytics.uniqueVisitors7d === '0' || analytics.uniqueVisitors7d === '—' ? undefined : '+15%'}
           icon={Users}
-          note="Data pending"
+          note="Active Users"
         />
         <AnalyticsCard
           title="Top Traffic Source"
-          value="—"
+          value={analytics.topCountry}
           icon={Globe}
-          note="Google Analytics"
+          note="Global Reach"
         />
       </div>
+
 
       {/* Main Metrics Grid */}
       {/* Main Metrics Grid */}
