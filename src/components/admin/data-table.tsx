@@ -26,6 +26,7 @@ interface DataTableProps<TData> {
   data: TData[];
   searchKey?: string;
   searchPlaceholder?: string;
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData>({
@@ -33,6 +34,7 @@ export function DataTable<TData>({
   data,
   searchKey,
   searchPlaceholder = 'Search...',
+  onRowClick,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -123,7 +125,8 @@ export function DataTable<TData>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]"
+                  className={`border-b border-white/[0.04] transition-colors hover:bg-white/[0.02] ${onRowClick ? 'cursor-pointer' : ''}`}
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 text-sm text-white/70">

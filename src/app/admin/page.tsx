@@ -4,40 +4,58 @@ import {
   Mail,
   FolderKanban,
   Receipt,
-  Activity,
-  Clock,
   TrendingUp,
   ArrowUpRight,
+  BarChart3,
+  Users,
+  Globe,
+  Calendar,
+  ExternalLink,
 } from 'lucide-react';
 import { getQuotes, getMessages, getProjects } from '@/lib/data';
 import { getAuditLogs } from '@/lib/audit';
+import { getCalendarEvents } from '@/app/actions/calendar';
 
 /**
  * Admin Dashboard
  * ----------------
- * Overview with metrics widgets and quick actions.
+ * Revamped overview with analytics, upcoming meetings, and quick actions.
  */
 
 export default async function AdminDashboardPage() {
   // Fetch data for metrics
-  const [quotes, messages, projects, auditLogs] = await Promise.all([
+  const [quotes, messages, projects, auditLogs, calendarEvents] = await Promise.all([
     getQuotes(),
     getMessages(),
     getProjects(),
     getAuditLogs(10),
+    getCalendarEvents(),
   ]);
 
   // Calculate metrics
   const newQuotes = quotes.filter((q) => q.status === 'new').length;
   const newMessages = messages.filter((m) => m.status === 'new').length;
-  const activeProjects = projects.filter((p) => p.featured).length; // TODO: Replace with real status
-  const pendingProjects = projects.length - activeProjects;
+  const activeProjects = projects.filter((p) => p.status === 'active').length;
+  const pendingProjects = projects.filter((p) => p.status === 'pending').length;
 
   // Recent activity (last 24 hours)
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const recentActivity = auditLogs.filter(
-    (log) => log.timestamp > oneDayAgo
-  ).length;
+  // Note: Using a stable date calculation for server component
+  const recentActivity = auditLogs.filter((log) => {
+    const logDate = new Date(log.timestamp);
+    const dayAgo = new Date();
+    dayAgo.setHours(dayAgo.getHours() - 24);
+    return logDate > dayAgo;
+  }).length;
+
+  // Upcoming events (next 7 days)
+  const now = new Date();
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const upcomingEvents = calendarEvents
+    .filter((event) => {
+      const eventDate = new Date(event.start);
+      return eventDate >= now && eventDate <= sevenDaysFromNow;
+    })
+    .slice(0, 5);
 
   return (
     <div>
@@ -47,7 +65,31 @@ export default async function AdminDashboardPage() {
         <p className="mt-2 text-white/50">Welcome back, here&apos;s your overview.</p>
       </div>
 
-      {/* Metrics Grid */}
+      {/* Analytics Row (NEW - Priority) */}
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
+        <AnalyticsCard
+          title="Page Views (24h)"
+          value="—"
+          change="+0%"
+          icon={BarChart3}
+          note="Connect Vercel Analytics"
+        />
+        <AnalyticsCard
+          title="Unique Visitors (7d)"
+          value="—"
+          change="+0%"
+          icon={Users}
+          note="Data pending"
+        />
+        <AnalyticsCard
+          title="Top Traffic Source"
+          value="—"
+          icon={Globe}
+          note="Google Analytics"
+        />
+      </div>
+
+      {/* Main Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Quotes */}
         <MetricCard
@@ -85,15 +127,15 @@ export default async function AdminDashboardPage() {
           value={recentActivity}
           subtitle="Last 24 hours"
           href="/admin/audit"
-          icon={Activity}
+          icon={TrendingUp}
           color="orange"
         />
       </div>
 
-      {/* Secondary Row */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        {/* Recent Quotes */}
-        <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
+      {/* Secondary Row - Recent Quotes (Priority) + Upcoming Meetings */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        {/* Recent Quotes - Takes 2 columns */}
+        <div className="lg:col-span-2 rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-white">Recent Quotes</h2>
             <Link
@@ -104,10 +146,11 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
           <div className="mt-4 space-y-3">
-            {quotes.slice(0, 4).map((quote) => (
-              <div
+            {quotes.slice(0, 5).map((quote) => (
+              <Link
                 key={quote.id}
-                className="flex items-center justify-between rounded-md bg-white/[0.02] p-3"
+                href={`/admin/quotes?id=${quote.id}`}
+                className="flex items-center justify-between rounded-md bg-white/[0.02] p-3 transition-all hover:bg-white/[0.05]"
               >
                 <div>
                   <div className="text-sm font-medium text-white">{quote.name}</div>
@@ -116,12 +159,14 @@ export default async function AdminDashboardPage() {
                 <span
                   className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${quote.status === 'new'
                     ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'bg-white/10 text-white/40'
+                    : quote.status === 'contacted'
+                      ? 'bg-cyan-500/10 text-cyan-400'
+                      : 'bg-white/10 text-white/40'
                     }`}
                 >
                   {quote.status}
                 </span>
-              </div>
+              </Link>
             ))}
             {quotes.length === 0 && (
               <p className="text-sm text-white/30">No quotes yet</p>
@@ -129,39 +174,100 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Upcoming Meetings */}
         <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
-          <h2 className="font-semibold text-white">Quick Actions</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <QuickAction
-              href="/admin/invoices/new"
-              icon={Receipt}
-              label="Create Invoice"
-            />
-            <QuickAction
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-white">Upcoming Schedule</h2>
+            <Link
               href="/admin/calendar"
-              icon={Clock}
-              label="View Calendar"
-            />
-            <QuickAction
-              href="/admin/projects"
-              icon={FolderKanban}
-              label="Manage Projects"
-            />
-            <QuickAction
-              href="/"
-              icon={TrendingUp}
-              label="View Public Site"
-              external
-            />
+              className="flex items-center gap-1 text-sm text-white/40 transition-colors hover:text-white"
+            >
+              Calendar <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="mt-4 space-y-3">
+            {upcomingEvents.map((event) => (
+              <div
+                key={event.id}
+                className="flex items-start gap-3 rounded-md bg-white/[0.02] p-3"
+              >
+                <div
+                  className={`mt-0.5 h-2 w-2 rounded-full ${event.type === 'deadline'
+                    ? 'bg-red-400'
+                    : event.type === 'meeting'
+                      ? 'bg-cyan-400'
+                      : event.type === 'milestone'
+                        ? 'bg-purple-400'
+                        : 'bg-white/40'
+                    }`}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white truncate">{event.title}</div>
+                  <div className="text-xs text-white/40">
+                    {new Date(event.start).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    {event.type === 'meeting' && !event.allDay && (
+                      <span className="ml-1">
+                        at {new Date(event.start).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {upcomingEvents.length === 0 && (
+              <p className="text-sm text-white/30">No upcoming events</p>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Quick Links (Minimized) */}
+      <div className="mt-6 flex flex-wrap gap-2">
+        <QuickLink href="/admin/invoices/new" icon={Receipt} label="New Invoice" />
+        <QuickLink href="/admin/calendar" icon={Calendar} label="Calendar" />
+        <QuickLink href="/admin/projects" icon={FolderKanban} label="Projects" />
+        <QuickLink href="/" icon={ExternalLink} label="View Site" external />
       </div>
     </div>
   );
 }
 
 // ---------- Components ----------
+
+interface AnalyticsCardProps {
+  title: string;
+  value: string;
+  change?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  note?: string;
+}
+
+function AnalyticsCard({ title, value, change, icon: Icon, note }: AnalyticsCardProps) {
+  return (
+    <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-white/40 uppercase tracking-wider">{title}</span>
+        <Icon className="h-4 w-4 text-white/20" />
+      </div>
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="text-2xl font-bold text-white">{value}</span>
+        {change && (
+          <span className={`text-xs ${change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
+            {change}
+          </span>
+        )}
+      </div>
+      {note && <p className="mt-1 text-[10px] text-white/30">{note}</p>}
+    </div>
+  );
+}
 
 interface MetricCardProps {
   title: string;
@@ -213,24 +319,24 @@ function MetricCard({
   );
 }
 
-interface QuickActionProps {
+interface QuickLinkProps {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   external?: boolean;
 }
 
-function QuickAction({ href, icon: Icon, label, external }: QuickActionProps) {
+function QuickLink({ href, icon: Icon, label, external }: QuickLinkProps) {
   const Component = external ? 'a' : Link;
   const props = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 
   return (
     <Component
       href={href}
-      className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.02] p-3 text-sm text-white/70 transition-all hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white"
+      className="inline-flex items-center gap-2 rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 text-xs text-white/50 transition-all hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white"
       {...props}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3 w-3" />
       {label}
     </Component>
   );

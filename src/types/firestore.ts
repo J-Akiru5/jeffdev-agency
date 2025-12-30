@@ -126,3 +126,22 @@ export interface CalendarEvent {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// =============================================================================
+// FEEDBACK (Client Testimonials/Reviews)
+// =============================================================================
+export type FeedbackStatus = 'pending' | 'approved' | 'featured' | 'rejected';
+
+export interface FirestoreFeedback {
+  id?: string;
+  clientName: string;
+  clientEmail: string;
+  company?: string;
+  projectSlug?: string; // Link to related project
+  rating: number; // 1-5
+  testimonial: string;
+  status: FeedbackStatus;
+  featured: boolean; // Show on public site
+  createdAt: string;
+  updatedAt: string;
+}
