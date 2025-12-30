@@ -7,10 +7,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
+import { acceptInvite } from '@/app/actions/accept-invite';
 
 export async function POST(request: NextRequest) {
   try {
-    const { idToken } = await request.json();
+    const { idToken, inviteToken } = await request.json();
 
     if (!idToken) {
       return NextResponse.json(
@@ -21,6 +22,31 @@ export async function POST(request: NextRequest) {
 
     // Verify the ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    const email = decodedToken.email;
+
+    // Handle invite if present
+    let redirectPath = '/admin'; // Default redirect
+    if (inviteToken) {
+      if (!email) {
+        return NextResponse.json(
+          { error: 'Email is required for invite acceptance' },
+          { status: 400 }
+        );
+      }
+
+      const inviteResult = await acceptInvite(inviteToken, uid, email);
+
+      if (!inviteResult.success) {
+        return NextResponse.json(
+          { error: inviteResult.error || 'Failed to accept invite' },
+          { status: 400 }
+        );
+      }
+
+      // New users go to profile setup
+      redirectPath = '/admin/profile';
+    }
 
     // Create session cookie (expires in 5 days)
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
@@ -39,7 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { success: true, uid: decodedToken.uid },
+      { success: true, uid, redirectPath },
       { status: 200 }
     );
   } catch (error) {

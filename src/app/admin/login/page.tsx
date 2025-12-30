@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -12,10 +12,18 @@ import { Loader2 } from 'lucide-react';
  * Google OAuth authentication for admin access.
  */
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get('invite');
+
+  // UI Text based on context
+  const title = inviteToken ? 'Join Team' : 'Admin Login';
+  const subtitle = inviteToken
+    ? 'Sign in with your invited Google account to complete setup'
+    : 'Sign in with your authorized Google account';
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -32,18 +40,29 @@ export default function AdminLoginPage() {
       const response = await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({
+          idToken,
+          inviteToken // Pass invite token if present
+        }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create session');
+        throw new Error(data.error || 'Failed to create session');
       }
 
-      // Redirect to admin dashboard
-      router.push('/admin');
-    } catch (err: any) {
+      // Redirect to dashboard or profile setup
+      router.push(data.redirectPath || '/admin');
+    } catch (err) {
       console.error('[LOGIN ERROR]', err);
-      setError(err.message || 'Failed to sign in');
+      const error = err as { code?: string; message: string };
+      // Handle Firebase Auth errors (like popup closed)
+      if (error.code === 'auth/popup-closed-by-user') {
+        setIsLoading(false);
+        return;
+      }
+      setError(error.message || 'Failed to sign in');
       setIsLoading(false);
     }
   };
@@ -52,13 +71,16 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-void px-6">
       <div className="w-full max-w-md">
         <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
-          <h1 className="text-2xl font-bold text-white">Admin Login</h1>
-          <p className="mt-2 text-white/50">
-            Sign in with your authorized Google account
-          </p>
+          <div className="mb-8 text-center">
+            {/* Logo or specialized icon could go here */}
+            <h1 className="text-2xl font-bold text-white">{title}</h1>
+            <p className="mt-2 text-white/50 text-sm">
+              {subtitle}
+            </p>
+          </div>
 
           {error && (
-            <div className="mt-6 rounded-md border border-red-500/20 bg-red-500/10 p-4">
+            <div className="mb-6 rounded-md border border-red-500/20 bg-red-500/10 p-4">
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
@@ -66,12 +88,12 @@ export default function AdminLoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="mt-8 flex w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/5 px-6 py-3 text-white transition-all hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/5 px-6 py-3 text-white transition-all hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Signing in...
+                {inviteToken ? 'Setting up...' : 'Signing in...'}
               </>
             ) : (
               <>
@@ -100,5 +122,13 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-void" />}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }

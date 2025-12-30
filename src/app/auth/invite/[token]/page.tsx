@@ -99,15 +99,16 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
 /**
  * Client-side button for handling Firebase Auth
  */
+/**
+ * Client-side button for handling navigation
+ */
 function InviteSignupButton({ token }: { token: string }) {
   return (
-    <form action={`/api/auth/invite?token=${token}`} method="GET">
-      <button
-        type="submit"
-        className="w-full rounded-md bg-cyan-500 px-6 py-3 text-sm font-medium text-black transition-colors hover:bg-cyan-400"
-      >
-        Continue with Google
-      </button>
-    </form>
+    <Link
+      href={`/admin/login?invite=${token}`}
+      className="flex w-full items-center justify-center rounded-md bg-cyan-500 px-6 py-3 text-sm font-medium text-black transition-colors hover:bg-cyan-400"
+    >
+      Continue with Google
+    </Link>
   );
 }
