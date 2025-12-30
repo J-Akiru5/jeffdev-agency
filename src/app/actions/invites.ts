@@ -235,16 +235,10 @@ export async function getInvites(): Promise<UserInvite[]> {
 
     return snapshot.docs.map((doc) => {
       const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.()
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt,
-        expiresAt: data.expiresAt?.toDate?.()
-          ? data.expiresAt.toDate().toISOString()
-          : data.expiresAt,
-      } as UserInvite;
+      return sanitizeFirestoreData<UserInvite>({
+        id: doc.id, 
+        ...data
+      });
     });
   } catch (error) {
     console.error('[GET INVITES ERROR]', error);
