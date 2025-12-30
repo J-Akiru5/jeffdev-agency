@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/react';
 import { SmoothScroll } from '@/components/providers/smooth-scroll';
 import './globals.css';
 
@@ -153,6 +154,9 @@ export default function RootLayout({
             {children}
           </div>
         </SmoothScroll>
+
+        {/* Vercel Analytics - Web Vitals Tracking */}
+        <Analytics />
       </body>
     </html>
   );
