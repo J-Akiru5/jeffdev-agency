@@ -1,119 +1,106 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy for JeffDev Web Development Services.',
+  description: 'How JeffDev Studio collects, uses, and protects your data.',
 };
 
-export default function PrivacyPage() {
+export default function PrivacyPolicyPage() {
   return (
-    <>
-      <Header />
-      <main className="pt-24">
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-3xl">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
+    <div className="mx-auto min-h-screen max-w-4xl px-6 pt-32 pb-20">
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">Privacy Policy</h1>
+        <p className="mt-4 text-white/50">Last updated: December 30, 2025</p>
+      </div>
 
-            <h1 className="mt-8 text-4xl font-bold tracking-tight text-white">
-              Privacy Policy
-            </h1>
-            <p className="mt-2 font-mono text-xs text-white/40">
-              Last updated: December 2024
-            </p>
+      <div className="prose prose-invert prose-cyan max-w-none space-y-10">
+        <Section title="1. Introduction">
+          <p>
+            JeffDev Studio ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website [jeffdev.studio] (the "Site").
+          </p>
+        </Section>
 
-            <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
-              <h2>1. Information We Collect</h2>
-              <p>
-                We collect information you provide directly to us, including:
-              </p>
-              <ul>
-                <li>Name and contact information (email, phone)</li>
-                <li>Company name and business details</li>
-                <li>Project requirements and specifications</li>
-                <li>Payment and billing information</li>
-              </ul>
+        <Section title="2. Information We Collect">
+          <h3 className="text-xl font-semibold text-white">a. Personal Data</h3>
+          <p>
+            We may collect personal information that you voluntarily provide to us when you fill out a contact form, request a quote, or subscribe to our newsletter. This includes:
+          </p>
+          <ul className="list-disc pl-5 text-white/70">
+            <li>Name</li>
+            <li>Email address</li>
+            <li>Phone number</li>
+            <li>Company name</li>
+            <li>Project details</li>
+          </ul>
 
-              <h2>2. How We Use Your Information</h2>
-              <p>We use the information we collect to:</p>
-              <ul>
-                <li>Provide and deliver our services</li>
-                <li>Communicate with you about projects</li>
-                <li>Send invoices and process payments</li>
-                <li>Improve our services and website</li>
-                <li>Comply with legal obligations</li>
-              </ul>
+          <h3 className="mt-6 text-xl font-semibold text-white">b. Usage Data</h3>
+          <p>
+            We automatically collect certain information when you visit, using cookies and similar tracking technologies. This includes:
+          </p>
+          <ul className="list-disc pl-5 text-white/70">
+            <li>IP address</li>
+            <li>Browser type and version</li>
+            <li>Pages visited and time spent</li>
+            <li>Referring website</li>
+          </ul>
+        </Section>
 
-              <h2>3. Information Sharing</h2>
-              <p>
-                We do not sell or rent your personal information. We may share
-                information:
-              </p>
-              <ul>
-                <li>With service providers who assist in our operations</li>
-                <li>When required by law or legal process</li>
-                <li>To protect our rights and property</li>
-              </ul>
+        <Section title="3. How We Use Your Information">
+          <p>We use the collected data for the following purposes:</p>
+          <ul className="list-disc pl-5 text-white/70">
+            <li>To provide and maintain our Service.</li>
+            <li>To notify you about changes to our Service.</li>
+            <li>To provide customer support.</li>
+            <li>To gather analysis or valuable information so that we can improve our Service.</li>
+            <li>To monitor the usage of our Service.</li>
+            <li>To detect, prevent and address technical issues.</li>
+          </ul>
+        </Section>
 
-              <h2>4. Data Security</h2>
-              <p>
-                We implement appropriate technical and organizational measures
-                to protect your personal information against unauthorized
-                access, alteration, disclosure, or destruction.
-              </p>
+        <Section title="4. Cookies">
+          <p>
+            We use cookies to track the activity on our Service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Service.
+          </p>
+          <p>
+            For more details, please see our <Link href="/cookies" className="text-cyan-400 hover:underline">Cookie Policy</Link>.
+          </p>
+        </Section>
 
-              <h2>5. Data Retention</h2>
-              <p>
-                We retain your information for as long as necessary to fulfill
-                the purposes outlined in this policy, unless a longer retention
-                period is required by law.
-              </p>
+        <Section title="5. Data Security">
+          <p>
+            The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.
+          </p>
+        </Section>
 
-              <h2>6. Your Rights</h2>
-              <p>You have the right to:</p>
-              <ul>
-                <li>Access your personal information</li>
-                <li>Correct inaccurate data</li>
-                <li>Request deletion of your data</li>
-                <li>Object to processing of your data</li>
-              </ul>
+        <Section title="6. Third-Party Services">
+          <p>
+            We may employ third-party companies and individuals to facilitate our Service ("Service Providers"), to provide the Service on our behalf, to perform Service-related services or to assist us in analyzing how our Service is used.
+          </p>
+          <ul className="list-disc pl-5 text-white/70">
+            <li><strong>Google Analytics:</strong> We use Google Analytics to monitor and analyze the use of our Service.</li>
+            <li><strong>Vercel Analytics:</strong> We use Vercel Analytics to measure performance and web vitals.</li>
+          </ul>
+        </Section>
 
-              <h2>7. Cookies</h2>
-              <p>
-                We use essential cookies to operate our website. We may also
-                use analytics cookies to understand how visitors interact with
-                our site. You can control cookie settings in your browser.
-              </p>
+        <Section title="7. Contact Us">
+          <p>
+            If you have any questions about this Privacy Policy, please contact us:
+          </p>
+          <p className="mt-2 text-white">
+            By email: <a href="mailto:contact@jeffdev.studio" className="text-cyan-400 hover:underline">contact@jeffdev.studio</a>
+          </p>
+        </Section>
+      </div>
+    </div>
+  );
+}
 
-              <h2>8. Changes to This Policy</h2>
-              <p>
-                We may update this privacy policy from time to time. We will
-                notify you of any changes by posting the new policy on this
-                page.
-              </p>
-
-              <h2>Contact</h2>
-              <p>
-                For privacy-related inquiries, contact us at{' '}
-                <a href="mailto:privacy@jeffdev.studio" className="text-cyan-400">
-                  privacy@jeffdev.studio
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="mb-4 text-2xl font-bold text-white">{title}</h2>
+      <div className="text-lg leading-relaxed text-white/70">{children}</div>
+    </section>
   );
 }

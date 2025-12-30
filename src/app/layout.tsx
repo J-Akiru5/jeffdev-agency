@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
-import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/react';
 import { SmoothScroll } from '@/components/providers/smooth-scroll';
+import { CookieConsent } from '@/components/cookie-consent';
+import { AnalyticsProvider } from '@/components/analytics-provider';
 import './globals.css';
 
 /**
@@ -106,25 +107,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Google Analytics 4 */}
-        {process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}', {
-                  page_path: window.location.pathname,
-                });
-              `}
-            </Script>
-          </>
-        )}
+        <AnalyticsProvider />
       </head>
       <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
@@ -157,6 +140,7 @@ export default function RootLayout({
 
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />
+        <CookieConsent />
       </body>
     </html>
   );
