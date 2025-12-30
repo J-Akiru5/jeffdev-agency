@@ -1,6 +1,6 @@
 ---
-trigger: model_decision
-description: Look at the tech stack. 
+trigger: always_on
+description: Look at the tech stack.
 ---
 
 # ⚡ JEFFDEV AGENCY - TECH STACK PROTOCOLS

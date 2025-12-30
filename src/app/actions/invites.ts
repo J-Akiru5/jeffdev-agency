@@ -12,12 +12,16 @@ import type { UserRole } from '@/types/rbac';
 import type { UserInvite } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
 import { randomBytes } from 'crypto';
+import { sendEmail, inviteEmailTemplate } from '@/lib/email';
 
 const COLLECTION = 'invites';
 const USERS_COLLECTION = 'users';
 
 // Founder UID - locked to single account
 const FOUNDER_UID = process.env.FOUNDER_UID || 'founder-001';
+
+// Base URL for invite links
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
 
 /**
  * Generate a secure invite token
@@ -28,9 +32,16 @@ function generateInviteToken(): string {
 
 /**
  * Create a new invite (Founder/Admin only)
+ * Automatically sends invite email via Resend
  */
 export async function createInvite(
-  data: { email: string; role: UserRole; invitedBy: string }
+  data: {
+    email: string;
+    role: UserRole;
+    invitedBy: string;
+    projectId?: string;  // Optional project assignment
+    projectName?: string;
+  }
 ): Promise<{ success: boolean; inviteId?: string; error?: string }> {
   try {
     // Validate role (prevent creating Founder invites)
@@ -61,6 +72,13 @@ export async function createInvite(
       return { success: false, error: 'Pending invite already exists for this email' };
     }
 
+    // Get inviter's name for the email
+    let inviterName: string | undefined;
+    const inviterDoc = await db.collection(USERS_COLLECTION).doc(data.invitedBy).get();
+    if (inviterDoc.exists) {
+      inviterName = inviterDoc.data()?.displayName;
+    }
+
     // Create invite
     const token = generateInviteToken();
     const expiresAt = new Date();
@@ -74,15 +92,45 @@ export async function createInvite(
       token,
       expiresAt: expiresAt.toISOString(),
       createdAt: new Date().toISOString(),
+      ...(data.projectId && { projectId: data.projectId }),
+      ...(data.projectName && { projectName: data.projectName }),
     };
 
     const docRef = await db.collection(COLLECTION).add(invite);
+
+    // Send invite email via Resend
+    const inviteLink = `${BASE_URL}/auth/invite/${token}`;
+
+    try {
+      await sendEmail({
+        to: data.email,
+        subject: `You're invited to join JD Studio as ${data.role}`,
+        html: inviteEmailTemplate({
+          email: data.email,
+          role: data.role,
+          inviteLink,
+          inviterName,
+          projectName: data.projectName,
+          expiresAt: expiresAt.toISOString(),
+        }),
+      });
+    } catch (emailError) {
+      console.error('[INVITE EMAIL SEND ERROR]', emailError);
+      // Don't fail the invite creation, just log the error
+      // The invite is still valid, admin can resend
+    }
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'users',
       resourceId: docRef.id,
-      details: { email: data.email, role: data.role, type: 'invite' },
+      details: {
+        email: data.email,
+        role: data.role,
+        type: 'invite',
+        projectId: data.projectId,
+        emailSent: true,
+      },
     });
 
     return { success: true, inviteId: docRef.id };

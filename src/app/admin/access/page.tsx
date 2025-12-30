@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Shield, Users, Lock, Key } from 'lucide-react';
 import { cookies } from 'next/headers';
@@ -159,8 +160,8 @@ export default async function AdminAccessPage() {
               </thead>
               <tbody>
                 {permissionGroups.map((group) => (
-                  <>
-                    <tr key={group.group} className="bg-white/2">
+                  <React.Fragment key={group.group}>
+                    <tr className="bg-white/2">
                       <td
                         colSpan={roles.length + 1}
                         className="px-4 py-2 text-xs font-semibold text-white/60"
@@ -189,7 +190,7 @@ export default async function AdminAccessPage() {
                         })}
                       </tr>
                     ))}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

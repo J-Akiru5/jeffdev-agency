@@ -83,4 +83,7 @@ export interface UserInvite {
   token: string; // Unique invite token
   expiresAt: string;
   createdAt: string;
+  projectId?: string;   // Optional: assign to specific project
+  projectName?: string; // Optional: display in invite email
 }
+

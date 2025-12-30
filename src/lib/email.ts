@@ -213,3 +213,81 @@ export function quoteEmailTemplate(data: {
 </html>
   `;
 }
+
+/**
+ * Invite Email Template
+ * Sent when a team member is invited to join JD Studio
+ */
+export function inviteEmailTemplate(data: {
+  email: string;
+  role: string;
+  inviteLink: string;
+  inviterName?: string;
+  projectName?: string;
+  expiresAt: string;
+}) {
+  const roleColors: Record<string, string> = {
+    admin: '#06b6d4',
+    partner: '#10b981',
+    employee: '#8b5cf6',
+  };
+
+  const roleColor = roleColors[data.role] || '#06b6d4';
+  const expiresDate = new Date(data.expiresAt).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're Invited to Join JD Studio</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #e5e5e5; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a;">
+  <div style="background: linear-gradient(135deg, ${roleColor}20 0%, #1a1a1a 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
+    <h1 style="margin: 0 0 10px 0; color: white; font-size: 28px; font-weight: 700;">You're Invited!</h1>
+    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 16px;">Join the JD Studio team</p>
+  </div>
+  
+  <div style="background: #111111; padding: 40px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
+    <p style="margin: 0 0 20px 0; font-size: 16px;">
+      ${data.inviterName ? `<strong>${data.inviterName}</strong> has invited you` : 'You have been invited'} to join JD Studio as a <span style="color: ${roleColor}; font-weight: 600; text-transform: capitalize;">${data.role}</span>.
+    </p>
+    
+    ${data.projectName ? `
+    <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid ${roleColor};">
+      <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.6);">You'll be working on:</p>
+      <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: white;">${data.projectName}</p>
+    </div>
+    ` : ''}
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${data.inviteLink}" style="display: inline-block; background: ${roleColor}; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+        Accept Invitation
+      </a>
+    </div>
+    
+    <p style="margin: 30px 0 10px 0; font-size: 14px; color: rgba(255,255,255,0.5);">
+      This invitation expires on <strong>${expiresDate}</strong>.
+    </p>
+    
+    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.4);">
+      If you weren't expecting this email, you can safely ignore it.
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+    
+    <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
+      <strong>JD Studio</strong> • Enterprise Web Solutions<br>
+      <a href="https://jeffdev.studio" style="color: ${roleColor}; text-decoration: none;">jeffdev.studio</a>
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
