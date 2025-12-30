@@ -109,27 +109,20 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const toastId = toast.loading('Uploading image...');
 
     try {
-      // 1. Get presigned URL
-      const { getSignedUploadUrl } = await import('@/app/actions/upload');
-      const result = await getSignedUploadUrl(file.name, file.type);
+      // Create FormData
+      const formData = new FormData();
+      formData.append('file', file);
 
-      if ('error' in result) throw new Error(result.error);
+      // Upload via Server Action (Proxy to bypass CORS)
+      const { uploadFile } = await import('@/app/actions/upload');
+      const result = await uploadFile(formData);
 
-      const { url, fileUrl } = result;
+      if (!result.success || !result.url) {
+        throw new Error(result.error || 'Upload failed');
+      }
 
-      // 2. Upload to R2
-      const uploadRes = await fetch(url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
-
-      if (!uploadRes.ok) throw new Error('Upload failed');
-
-      // 3. Update State
-      setFormData((prev) => ({ ...prev, photoURL: fileUrl }));
+      // Update State
+      setFormData((prev) => ({ ...prev, photoURL: result.url! }));
       toast.success('Image uploaded successfully', { id: toastId });
 
     } catch (error) {

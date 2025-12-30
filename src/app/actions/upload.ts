@@ -53,3 +53,48 @@ export async function getSignedUploadUrl(
     return { error: 'Failed to generate upload URL.' };
   }
 }
+
+/**
+ * SERVER-SIDE UPLOAD (CORS BYPASS)
+ * --------------------------------
+ * Handles file upload directly on the server for cases where
+ * client-side CORS is not configured or blocked.
+ */
+export async function uploadFile(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const file = formData.get('file') as File;
+    if (!file) return { success: false, error: 'No file provided' };
+
+    // Validate type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      return { success: false, error: 'Invalid file type' };
+    }
+
+    // Generate Key
+    const ext = file.name.split('.').pop();
+    const uniqueKey = `uploads/${randomUUID()}.${ext}`;
+
+    // Convert to Buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Upload to R2 (Server-side)
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: uniqueKey,
+      Body: buffer,
+      ContentType: file.type,
+    });
+
+    await r2.send(command);
+
+    // Return Proxy URL
+    const fileUrl = `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/file/${uniqueKey}`;
+
+    return { success: true, url: fileUrl };
+  } catch (error) {
+    console.error('Server Upload Error:', error);
+    return { success: false, error: 'Upload failed' };
+  }
+}
