@@ -140,7 +140,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
       const data = doc.data();
 
       // Serialize Firestore Timestamps to ISO strings
-      return {
+      const profile = {
         uid: doc.id,
         ...data,
         createdAt: data.createdAt?.toDate?.()
@@ -150,6 +150,12 @@ export async function getAllUsers(): Promise<UserProfile[]> {
           ? data.updatedAt.toDate().toISOString()
           : data.updatedAt || new Date().toISOString(),
       } as UserProfile;
+
+      if (data.lastLoginAt?.toDate?.()) {
+        profile.lastLoginAt = data.lastLoginAt.toDate().toISOString();
+      }
+
+      return profile;
     });
   } catch (error) {
     console.error('[GET ALL USERS ERROR]', error);
