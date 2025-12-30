@@ -32,20 +32,20 @@ import {
 } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 
-interface NavItem {
+export interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   permission?: string;
 }
 
-interface NavSection {
+export interface NavSection {
   title: string;
   items: NavItem[];
   minRole?: 'founder' | 'admin' | 'partner' | 'employee';
 }
 
-const navSections: NavSection[] = [
+export const navSections: NavSection[] = [
   {
     title: '',
     items: [
@@ -99,7 +99,7 @@ export function AdminSidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-white/[0.06] bg-void transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/6 bg-void transition-all duration-300 lg:flex ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >

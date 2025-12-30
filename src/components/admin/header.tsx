@@ -24,16 +24,21 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[0.06] bg-void/80 px-6 backdrop-blur-md">
-      {/* Search */}
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/6 bg-void/80 px-4 backdrop-blur-md lg:px-6">
+      {/* Search - Hidden on mobile */}
       <div className="flex items-center gap-4">
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
           <input
             type="text"
             placeholder="Search..."
             className="w-64 rounded-md border border-white/10 bg-white/5 py-2 pl-10 pr-4 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
           />
+        </div>
+
+        {/* Mobile Logo/Title (Optional, if you want something on the left) */}
+        <div className="md:hidden font-semibold text-white">
+          Dashboard
         </div>
       </div>
 
@@ -47,7 +52,7 @@ export function AdminHeader() {
           href="/admin/profile"
           className="flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
         >
-          <div className="text-right">
+          <div className="hidden text-right md:block">
             <div className="text-sm font-medium text-white">
               {loading ? 'Loading...' : displayUser.displayName}
             </div>

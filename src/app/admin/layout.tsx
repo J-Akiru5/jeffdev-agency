@@ -10,6 +10,8 @@ import { Toaster } from 'sonner';
  * Includes sidebar navigation and header.
  */
 
+import { MobileNav } from '@/components/admin/mobile-nav';
+
 export default function AdminLayout({
   children,
 }: {
@@ -19,13 +21,18 @@ export default function AdminLayout({
     <UserProvider>
       <div className="min-h-screen bg-void">
         <Toaster position="bottom-right" theme="dark" />
-        {/* Sidebar */}
+
+        {/* Desktop Sidebar */}
         <AdminSidebar />
 
+        {/* Mobile Navigation */}
+        <MobileNav />
+
         {/* Main Content */}
-        <div className="ml-64 transition-all duration-300">
+        <div className="ml-0 transition-all duration-300 lg:ml-64">
           <AdminHeader />
-          <main className="p-6">{children}</main>
+          {/* Add padding bottom for mobile nav clearance */}
+          <main className="p-4 pb-24 lg:p-6 lg:pb-6">{children}</main>
         </div>
       </div>
     </UserProvider>

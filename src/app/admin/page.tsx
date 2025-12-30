@@ -90,6 +90,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Main Metrics Grid */}
+      {/* Main Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Quotes */}
         <MetricCard
@@ -135,7 +136,7 @@ export default async function AdminDashboardPage() {
       {/* Secondary Row - Recent Quotes (Priority) + Upcoming Meetings */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Recent Quotes - Takes 2 columns */}
-        <div className="lg:col-span-2 rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
+        <div className="rounded-md border border-white/8 bg-white/2 p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-white">Recent Quotes</h2>
             <Link
