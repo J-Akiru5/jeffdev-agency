@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import Script from 'next/script';
 import { SmoothScroll } from '@/components/providers/smooth-scroll';
 import './globals.css';
 
@@ -29,11 +30,11 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: 'JD Studio // Enterprise Web Solutions',
+    default: 'JD Studio — Enterprise Web Development & SaaS Solutions',
     template: '%s // JD Studio',
   },
   description:
-    'High-performance web architecture for startups and enterprises. We build scalable SaaS platforms, cloud infrastructure, and premium digital experiences.',
+    'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.',
   keywords: [
     'web development agency',
     'SaaS development',
@@ -50,9 +51,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://jeffdev.studio',
     siteName: 'JD Studio',
-    title: 'JD Studio // Enterprise Web Solutions',
+    title: 'JD Studio — Enterprise Web Development & SaaS Solutions',
     description:
-      'High-performance web architecture for startups and enterprises.',
+      'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
     images: [
       {
         url: '/favicon/og-image.png',
@@ -64,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JD Studio // Enterprise Web Solutions',
+    title: 'JD Studio — Enterprise Web Development & SaaS Solutions',
     description:
-      'High-performance web architecture for startups and enterprises.',
+      'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
     images: ['/favicon/og-image.png'],
   },
   robots: {
@@ -103,6 +104,27 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Google Analytics 4 */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+      </head>
       <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
         <div

@@ -19,7 +19,7 @@ import { gsap } from 'gsap';
 const trustBadges = [
   { label: 'Next.js', sublabel: 'Certified' },
   { label: 'Firebase', sublabel: 'Partner' },
-  { label: '50+', sublabel: 'Projects' },
+  { label: '10+', sublabel: 'Projects' },
   { label: '99%', sublabel: 'Uptime SLA' },
 ];
 
