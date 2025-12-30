@@ -9,37 +9,78 @@ import { cookies } from 'next/headers';
  * Edit user profile, bio, photo, and namecard settings.
  */
 
-// TODO: Replace with actual auth session
-async function getCurrentUser() {
-  // This would normally come from Firebase Auth session
-  // For now, return a mock user profile
-  return {
-    uid: 'founder-001',
-    email: 'jeff@jeffdev.studio',
-    displayName: 'Jeff Martinez',
-    photoURL: undefined,
-    bio: '',
-    title: 'Founder & Lead Developer',
-    phone: '',
-    location: 'Iloilo, Philippines',
-    social: {
-      linkedin: '',
-      github: '',
-      twitter: '',
-      website: 'https://jeffdev.studio',
-    },
-    role: 'founder' as const,
-    status: 'active' as const,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    namecard: {
-      username: 'jeff',
-      tagline: 'Building the future, one line at a time',
-      showEmail: true,
-      showPhone: false,
-      accentColor: '#06b6d4',
-    },
-  };
+import { auth as adminAuth, db } from '@/lib/firebase/admin';
+import { redirect } from 'next/navigation';
+import { UserProfile } from '@/types/user';
+
+async function getCurrentUser(): Promise<UserProfile> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+
+  if (!sessionCookie) {
+    redirect('/admin/login');
+  }
+
+  try {
+    const decodedClaims = await adminAuth.verifySessionCookie(
+      sessionCookie.value,
+      true // checkRevoked
+    );
+
+    const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
+
+    if (!userDoc.exists) {
+      console.error('User document not found for UID:', decodedClaims.uid);
+      redirect('/admin/login');
+    }
+
+    const data = userDoc.data();
+
+    // Serializing basic timestamps
+    return {
+      uid: userDoc.id,
+      email: data?.email || decodedClaims.email || '',
+      displayName: data?.displayName || '',
+      photoURL: data?.photoURL || undefined,
+      role: data?.role || 'employee',
+      status: data?.status || 'active',
+      bio: data?.bio || '',
+      title: data?.title || '',
+      phone: data?.phone || '',
+      location: data?.location || '',
+      assignedProjects: data?.assignedProjects || [],
+      social: {
+        linkedin: data?.social?.linkedin || '',
+        github: data?.social?.github || '',
+        twitter: data?.social?.twitter || '',
+        website: data?.social?.website || '',
+      },
+      namecard: {
+        username: data?.namecard?.username || '',
+        tagline: data?.namecard?.tagline || '',
+        showEmail: data?.namecard?.showEmail ?? true,
+        showPhone: data?.namecard?.showPhone ?? false,
+        accentColor: data?.namecard?.accentColor || '#06b6d4',
+        background: data?.namecard?.background || 'gradient-dark',
+        socials: {
+          linkedin: data?.namecard?.socials?.linkedin ?? true,
+          github: data?.namecard?.socials?.github ?? true,
+          twitter: data?.namecard?.socials?.twitter ?? true,
+          website: data?.namecard?.socials?.website ?? true,
+        }
+      },
+      // Safely handle Firestore Timestamps
+      createdAt: data?.createdAt?.toDate?.()
+        ? data.createdAt.toDate().toISOString()
+        : new Date().toISOString(),
+      updatedAt: data?.updatedAt?.toDate?.()
+        ? data.updatedAt.toDate().toISOString()
+        : new Date().toISOString(),
+    } as UserProfile;
+  } catch (error) {
+    console.error('Session verification failed:', error);
+    redirect('/admin/login');
+  }
 }
 
 export default async function AdminProfilePage() {

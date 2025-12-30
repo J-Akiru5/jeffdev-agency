@@ -13,6 +13,7 @@ import { updateUserProfile, checkUsernameAvailable } from '@/app/actions/users';
 import type { UserProfile } from '@/types/user';
 import { toast } from 'sonner';
 import { NamecardPreview } from './namecard-preview';
+import { SetupGuide } from './setup-guide';
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -159,6 +160,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     <div className="grid gap-8 lg:grid-cols-5">
       {/* Left Column: Form (3 cols) */}
       <div className="lg:col-span-3">
+        <SetupGuide profile={profile} />
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Profile Photo */}
           <div className="flex items-center gap-6">
@@ -202,24 +204,28 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <h3 className="text-lg font-semibold text-white">Basic Information</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputField
+                id="input-display-name"
                 label="Display Name"
                 value={formData.displayName}
                 onChange={(v) => handleChange('displayName', v)}
                 required
               />
               <InputField
+                id="input-title"
                 label="Title / Role"
                 value={formData.title}
                 onChange={(v) => handleChange('title', v)}
                 placeholder="e.g., Lead Developer"
               />
               <InputField
+                id="input-phone"
                 label="Phone"
                 value={formData.phone}
                 onChange={(v) => handleChange('phone', v)}
                 placeholder="+63 XXX XXX XXXX"
               />
               <InputField
+                id="input-location"
                 label="Location"
                 value={formData.location}
                 onChange={(v) => handleChange('location', v)}
@@ -227,10 +233,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               />
             </div>
             <div>
-              <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+              <label htmlFor="input-bio" className="block text-xs text-white/40 uppercase tracking-wider mb-2">
                 Bio
               </label>
               <textarea
+                id="input-bio"
                 value={formData.bio}
                 onChange={(e) => handleChange('bio', e.target.value)}
                 rows={3}
@@ -294,6 +301,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <InputField
+                  id="input-username"
                   label="Username"
                   value={formData.namecard.username}
                   onChange={(v) => handleChange('namecard.username', v.toLowerCase().replace(/\s/g, '-'))}
@@ -417,6 +425,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               Discard Changes
             </button>
             <button
+              id="btn-save"
               type="submit"
               disabled={isLoading || !!usernameError}
               className="flex items-center gap-2 rounded-md bg-white px-6 py-2 text-sm font-bold text-black transition-transform hover:scale-105 hover:bg-white/90 disabled:opacity-50 disabled:hover:scale-100"
@@ -466,6 +475,7 @@ function InputField({
   required,
   icon: Icon,
   onBlur,
+  id,
 }: {
   label: string;
   value: string;
@@ -474,10 +484,11 @@ function InputField({
   required?: boolean;
     icon?: any;
   onBlur?: () => void;
+    id?: string;
 }) {
   return (
     <div>
-      <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+      <label htmlFor={id} className="block text-xs text-white/40 uppercase tracking-wider mb-2">
         {label}
       </label>
       <div className="relative">
@@ -485,6 +496,7 @@ function InputField({
           <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
         )}
         <input
+          id={id}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
