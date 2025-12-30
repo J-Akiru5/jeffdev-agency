@@ -37,3 +37,20 @@ export function generateMessageRef(): string {
 export function generateProjectRef(): string {
   return `PRJ-${nanoid(6).toUpperCase()}`;
 }
+
+/**
+ * Generate a subscription reference number
+ * Format: SUB-XXXXXX
+ */
+export function generateSubscriptionRef(): string {
+  return `SUB-${nanoid(6).toUpperCase()}`;
+}
+
+/**
+ * Generate a payment reference number
+ * Format: PAY-XXXXXX
+ */
+export function generatePaymentRef(): string {
+  return `PAY-${nanoid(6).toUpperCase()}`;
+}
+

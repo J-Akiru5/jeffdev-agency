@@ -52,13 +52,15 @@ export function Header() {
             href="/"
             className="group flex items-center gap-2 transition-opacity hover:opacity-80"
           >
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-br from-cyan-500 to-purple-600">
-              <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold text-white">
-                JD
-              </span>
+            <div className="relative h-8 w-8 overflow-hidden rounded-md">
+              <img
+                src="/favicon.svg"
+                alt="JD Studio"
+                className="h-full w-full object-cover"
+              />
             </div>
             <span className="hidden font-semibold tracking-tight text-white sm:block">
-              JeffDev<span className="text-cyan-400">.</span>Studio
+              JD Studio
             </span>
           </Link>
 

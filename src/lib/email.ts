@@ -110,7 +110,7 @@ export function contactEmailTemplate(data: {
   </div>
   
   <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-    <p>JeffDev Studio • Enterprise Web Solutions</p>
+    <p>JD Studio • Enterprise Web Solutions</p>
     <p>This is an automated notification from your contact form.</p>
   </div>
 </body>
@@ -206,7 +206,7 @@ export function quoteEmailTemplate(data: {
   </div>
   
   <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-    <p>JeffDev Studio • Enterprise Web Solutions</p>
+    <p>JD Studio • Enterprise Web Solutions</p>
     <p>This is an automated notification from your quote form.</p>
   </div>
 </body>

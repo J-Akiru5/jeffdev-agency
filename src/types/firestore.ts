@@ -106,3 +106,23 @@ export interface FirestoreMessage {
   createdAt: string;
   updatedAt: string;
 }
+
+// =============================================================================
+// CALENDAR EVENT
+// =============================================================================
+export type EventType = 'deadline' | 'meeting' | 'milestone' | 'reminder' | 'holiday';
+
+export interface CalendarEvent {
+  id?: string;
+  title: string;
+  description?: string;
+  type: EventType;
+  start: string; // ISO date string
+  end?: string; // ISO date string (optional for all-day events)
+  allDay?: boolean;
+  projectSlug?: string; // Link to project
+  color?: string; // Custom color override
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -107,8 +107,14 @@ export function AdminSidebar() {
       <div className="flex h-16 items-center justify-between border-b border-white/[0.06] px-4">
         {!collapsed && (
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-md bg-gradient-to-br from-cyan-500 to-purple-500" />
-            <span className="font-semibold text-white">JeffDev</span>
+            <div className="relative h-8 w-8 overflow-hidden rounded-md">
+              <img
+                src="/favicon.svg"
+                alt="JD Studio"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <span className="font-semibold text-white">JD Studio</span>
           </Link>
         )}
         <button

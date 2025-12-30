@@ -82,7 +82,7 @@ export const projects: Project[] = [
     id: 'vibecoder-engine',
     slug: 'vibecoder-engine',
     title: 'Vibecoder Engine',
-    client: 'JeffDev Studio',
+    client: 'JD Studio',
     category: 'Internal Tool',
     tagline: 'AI-accelerated development workflow',
     description:

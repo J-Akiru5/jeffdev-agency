@@ -60,7 +60,7 @@ export default function AboutPage() {
                   <span className="text-gradient-holographic">That Scale</span>
                 </h1>
                 <p className="mt-6 text-lg leading-relaxed text-white/60">
-                  JeffDev Studio is a web development agency focused on building
+                  JD Studio is a web development agency focused on building
                   high-performance systems for ambitious startups and scaling
                   enterprises. We don&apos;t just write code — we architect
                   solutions that grow with your business.

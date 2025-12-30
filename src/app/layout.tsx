@@ -29,8 +29,8 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: 'JeffDev Studio // Enterprise Web Solutions',
-    template: '%s // JeffDev Studio',
+    default: 'JD Studio // Enterprise Web Solutions',
+    template: '%s // JD Studio',
   },
   description:
     'High-performance web architecture for startups and enterprises. We build scalable SaaS platforms, cloud infrastructure, and premium digital experiences.',
@@ -40,25 +40,34 @@ export const metadata: Metadata = {
     'Next.js development',
     'enterprise web solutions',
     'cloud architecture',
-    'JeffDev Studio',
+    'JD Studio',
   ],
-  authors: [{ name: 'JeffDev Studio' }],
+  authors: [{ name: 'JD Studio' }],
   creator: 'JeffDev Web Development Services',
   metadataBase: new URL('https://jeffdev.studio'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://jeffdev.studio',
-    siteName: 'JeffDev Studio',
-    title: 'JeffDev Studio // Enterprise Web Solutions',
+    siteName: 'JD Studio',
+    title: 'JD Studio // Enterprise Web Solutions',
     description:
       'High-performance web architecture for startups and enterprises.',
+    images: [
+      {
+        url: '/favicon/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'JD Studio',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JeffDev Studio // Enterprise Web Solutions',
+    title: 'JD Studio // Enterprise Web Solutions',
     description:
       'High-performance web architecture for startups and enterprises.',
+    images: ['/favicon/og-image.png'],
   },
   robots: {
     index: true,
@@ -66,9 +75,12 @@ export const metadata: Metadata = {
   },
   themeColor: '#1c2124',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon.svg' },
+      { url: '/favicon/icon-48x48.png', sizes: '48x48', type: 'image/png' },
+    ],
+    shortcut: '/favicon/favicon.ico',
+    apple: '/favicon/apple-icon.png',
   },
 };
 

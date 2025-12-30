@@ -41,13 +41,15 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
-              <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-br from-cyan-500 to-purple-600">
-                <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold text-white">
-                  JD
-                </span>
+              <div className="relative h-8 w-8 overflow-hidden rounded-md">
+                <img
+                  src="/favicon.svg"
+                  alt="JD Studio"
+                  className="h-full w-full object-cover"
+                />
               </div>
               <span className="font-semibold tracking-tight text-white">
-                JeffDev<span className="text-cyan-400">.</span>Studio
+                JD Studio
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-white/50">
@@ -146,7 +148,7 @@ export function Footer() {
 
           {/* Copyright + DTI */}
           <div className="text-center text-xs text-white/30 md:text-right">
-            <p>© {currentYear} JeffDev Web Development Services.</p>
+            <p>© {currentYear} JD Studio.</p>
             <p className="mt-1 font-mono text-[10px] text-white/20">
               DTI: VLLP979818395984
             </p>
