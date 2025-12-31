@@ -12,7 +12,6 @@ import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
 import { generateInvoiceRef, generatePaymentRef } from '@/lib/ref-generator';
 import { sendEmail, invoiceEmailTemplate, BRANDED_SENDER } from '@/lib/email';
-import { generateInvoicePDFBuffer } from '@/lib/invoice-pdf-buffer';
 import type { Invoice, InvoiceStatus, PaymentRecord, PaymentMethod, Currency } from '@/types/invoice';
 
 // =============================================================================
@@ -171,6 +170,11 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
 
     return { success: true, id: docRef.id, refNo: invoice.refNo };
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('[CREATE INVOICE VALIDATION ERROR]', JSON.stringify(error.issues, null, 2));
+      const fieldErrors = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return { success: false, error: `Validation failed: ${fieldErrors}` };
+    }
     console.error('[CREATE INVOICE ERROR]', error);
     return { success: false, error: 'Failed to create invoice' };
   }
@@ -246,7 +250,8 @@ export async function sendInvoice(id: string) {
       return { success: false, error: 'Invoice already sent' };
     }
 
-    // Generate PDF buffer for attachment
+    // Generate PDF buffer for attachment (dynamic import to avoid module loading issues)
+    const { generateInvoicePDFBuffer } = await import('@/lib/invoice-pdf-buffer');
     const pdfBuffer = await generateInvoicePDFBuffer(invoice);
 
     // Prepare payment link
