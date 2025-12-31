@@ -30,16 +30,17 @@ if (!getApps().length) {
       privateKey,
     }),
   });
+
+  // Get Firestore and configure settings (must be done before any Firestore operations)
+  db = getFirestore(app);
+  db.settings({ ignoreUndefinedProperties: true });
+
+  auth = getAuth(app);
 } else {
   app = getApps()[0];
+  db = getFirestore(app);
+  auth = getAuth(app);
 }
-
-auth = getAuth(app);
-db = getFirestore(app);
-
-// Enable ignoreUndefinedProperties to prevent errors with optional fields
-db.settings({ ignoreUndefinedProperties: true });
 
 export { auth, auth as adminAuth, db };
 export default app;
-
