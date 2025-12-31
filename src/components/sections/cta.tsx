@@ -64,7 +64,7 @@ export function CTA() {
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
               <Zap className="h-3.5 w-3.5 text-emerald-400" />
               <span className="font-mono text-xs text-emerald-400">
-                2 Slots Available for Q1 2025
+                2 Slots Available for Q1 2026
               </span>
             </div>
 

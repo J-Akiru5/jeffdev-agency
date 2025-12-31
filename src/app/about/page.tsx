@@ -124,7 +124,7 @@ export default function AboutPage() {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-white/50">
                     <Calendar className="h-4 w-4" />
-                    Available for Q1 2025 projects
+                    Available for Q1 2026 projects
                   </div>
                   <a
                     href="mailto:jeff@jeffdev.studio"

@@ -91,7 +91,7 @@ export function Hero() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
           <span className="font-mono text-xs text-white/70">
-            Available for Q1 2025 Projects
+            Available for Q1 2026 Projects
           </span>
         </div>
 
