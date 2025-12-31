@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase/admin';
 
 export interface AuditEvent {
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE';
-  resource: 'services' | 'projects' | 'quotes' | 'messages' | 'calendar_events' | 'invoices' | 'subscriptions' | 'users' | 'feedback';
+  resource: 'services' | 'projects' | 'quotes' | 'messages' | 'calendar_events' | 'invoices' | 'subscriptions' | 'users' | 'feedback' | 'case_study';
   resourceId: string;
   details?: Record<string, unknown>;
   userEmail?: string;

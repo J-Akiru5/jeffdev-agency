@@ -29,6 +29,7 @@ import {
   ExternalLink,
   LogOut,
   User,
+  Layers,
 } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 
@@ -58,6 +59,7 @@ export const navSections: NavSection[] = [
     items: [
       { label: 'Services', href: '/admin/services', icon: Wrench },
       { label: 'Projects', href: '/admin/projects', icon: FolderKanban },
+      { label: 'Case Studies', href: '/admin/case-studies', icon: Layers },
     ],
   },
   {

@@ -95,6 +95,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ))}
             </div>
+
+            {/* Cover Image */}
+            {project.image && (
+              <div className="mt-12 overflow-hidden rounded-md border border-white/[0.08]">
+                <img
+                  src={project.image}
+                  alt={`${project.title} cover`}
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+            )}
           </div>
         </section>
 

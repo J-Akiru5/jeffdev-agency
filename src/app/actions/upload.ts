@@ -65,6 +65,12 @@ export async function uploadFile(formData: FormData): Promise<{ success: boolean
     const file = formData.get('file') as File;
     if (!file) return { success: false, error: 'No file provided' };
 
+    // Validate size (10MB limit)
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_SIZE) {
+      return { success: false, error: `File too large. Maximum size is ${MAX_SIZE / 1024 / 1024}MB.` };
+    }
+
     // Validate type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {

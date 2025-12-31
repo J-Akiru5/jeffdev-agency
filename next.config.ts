@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /*
+   * 0. EXPERIMENTAL FEATURES
+   *    Increase body size limit for server actions to allow larger file uploads (10MB).
+   */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
+
+  /*
    * 1. HIDE STACK DETAILS
    *    Disable the 'X-Powered-By: Next.js' header.
    */
