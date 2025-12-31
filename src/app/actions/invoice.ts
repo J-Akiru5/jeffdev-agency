@@ -11,6 +11,8 @@ import { db } from '@/lib/firebase/admin';
 import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
 import { generateInvoiceRef, generatePaymentRef } from '@/lib/ref-generator';
+import { sendEmail, invoiceEmailTemplate, BRANDED_SENDER } from '@/lib/email';
+import { generateInvoicePDFBuffer } from '@/lib/invoice-pdf-buffer';
 import type { Invoice, InvoiceStatus, PaymentRecord, PaymentMethod, Currency } from '@/types/invoice';
 
 // =============================================================================
@@ -239,11 +241,45 @@ export async function sendInvoice(id: string) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = doc.data() as Invoice;
+    const invoice = { id: doc.id, ...doc.data() } as Invoice;
     if (invoice.status !== 'draft') {
       return { success: false, error: 'Invoice already sent' };
     }
 
+    // Generate PDF buffer for attachment
+    const pdfBuffer = await generateInvoicePDFBuffer(invoice);
+
+    // Prepare payment link
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+    const paymentLink = `${baseUrl}/pay/${invoice.refNo}`;
+
+    // Send email with PDF attachment
+    await sendEmail({
+      to: invoice.clientEmail,
+      from: BRANDED_SENDER,
+      subject: `Invoice ${invoice.refNo} from JD Studio`,
+      html: invoiceEmailTemplate({
+        clientName: invoice.clientName,
+        refNo: invoice.refNo,
+        total: invoice.total,
+        currency: invoice.currency,
+        dueDate: invoice.dueDate,
+        paymentLink,
+        projectTitle: invoice.projectTitle,
+        items: invoice.items.map((item) => ({
+          description: item.description,
+          amount: item.amount,
+        })),
+      }),
+      attachments: [
+        {
+          filename: `Invoice-${invoice.refNo}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
+    });
+
+    // Update invoice status
     await docRef.update({
       status: 'sent',
       sentAt: new Date().toISOString(),
@@ -254,10 +290,8 @@ export async function sendInvoice(id: string) {
       action: 'STATUS_CHANGE',
       resource: 'invoices',
       resourceId: id,
-      details: { oldStatus: 'draft', newStatus: 'sent' },
+      details: { oldStatus: 'draft', newStatus: 'sent', emailSent: true },
     });
-
-    // TODO: Send email notification to client
 
     revalidatePath('/admin/invoices');
     revalidatePath(`/admin/invoices/${id}`);

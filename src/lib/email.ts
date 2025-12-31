@@ -26,12 +26,18 @@ export const BRANDED_SENDER = `JD Studio <${EMAIL_ADDRESSES.noreply}>`;
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
 const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
+interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
 interface SendEmailParams {
   to: string | string[];
   subject: string;
   html: string;
   from?: string;
   replyTo?: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmail({
@@ -40,6 +46,7 @@ export async function sendEmail({
   html,
   from = EMAIL_ADDRESSES.noreply,
   replyTo,
+  attachments,
 }: SendEmailParams) {
   try {
     const { data, error } = await resend.emails.send({
@@ -48,6 +55,7 @@ export async function sendEmail({
       subject,
       html,
       replyTo,
+      attachments,
     });
 
     if (error) {
@@ -300,3 +308,117 @@ export function inviteEmailTemplate(data: {
 </html>
   `;
 }
+
+/**
+ * Invoice Email Template
+ * Sent when an invoice is issued to a client
+ */
+export function invoiceEmailTemplate(data: {
+  clientName: string;
+  refNo: string;
+  total: number;
+  currency: 'USD' | 'PHP';
+  dueDate: string;
+  paymentLink: string;
+  projectTitle?: string;
+  items: { description: string; amount: number }[];
+}) {
+  const currencySymbol = data.currency === 'PHP' ? '₱' : '$';
+  const formattedTotal = `${currencySymbol}${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const formattedDueDate = new Date(data.dueDate).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const accentColor = '#06b6d4'; // cyan-500
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice ${data.refNo} from JD Studio</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #e5e5e5; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a;">
+  <div style="background: linear-gradient(135deg, ${accentColor}20 0%, #1a1a1a 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
+    <img src="${LOGO_URL}" alt="JD Studio" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
+    <h1 style="margin: 0 0 10px 0; color: white; font-size: 28px; font-weight: 700;">Invoice</h1>
+    <p style="margin: 0; color: ${accentColor}; font-family: monospace; font-size: 16px; letter-spacing: 1px;">${data.refNo}</p>
+  </div>
+  
+  <div style="background: #111111; padding: 40px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
+    <p style="margin: 0 0 20px 0; font-size: 16px;">
+      Hi <strong>${data.clientName}</strong>,
+    </p>
+    
+    <p style="margin: 0 0 25px 0; font-size: 15px; color: rgba(255,255,255,0.7);">
+      Please find attached your invoice for ${data.projectTitle ? `<strong>${data.projectTitle}</strong>` : 'services rendered'}.
+    </p>
+    
+    <!-- Invoice Summary Box -->
+    <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+        <span style="color: rgba(255,255,255,0.5); font-size: 13px;">AMOUNT DUE</span>
+      </div>
+      <div style="font-size: 32px; font-weight: 700; color: ${accentColor}; margin-bottom: 15px;">
+        ${formattedTotal}
+      </div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5);">
+        Due by <strong style="color: white;">${formattedDueDate}</strong>
+      </div>
+    </div>
+    
+    <!-- Line Items Preview -->
+    <div style="margin-bottom: 25px;">
+      <p style="margin: 0 0 12px 0; font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px;">Services</p>
+      ${data.items.slice(0, 3).map(item => `
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span style="color: rgba(255,255,255,0.8); font-size: 14px;">${item.description}</span>
+          <span style="color: rgba(255,255,255,0.6); font-size: 14px;">${currencySymbol}${item.amount.toLocaleString()}</span>
+        </div>
+      `).join('')}
+      ${data.items.length > 3 ? `
+        <p style="margin: 10px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.4);">
+          + ${data.items.length - 3} more items (see PDF attachment)
+        </p>
+      ` : ''}
+    </div>
+    
+    <!-- Pay Now Button -->
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${data.paymentLink}" style="display: inline-block; background: ${accentColor}; color: #000; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+        Pay Now
+      </a>
+    </div>
+    
+    <p style="margin: 20px 0 0 0; font-size: 13px; color: rgba(255,255,255,0.4); text-align: center;">
+      <strong>📎 PDF Invoice Attached</strong> — Save it for your records.
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+    
+    <!-- Payment Methods -->
+    <div style="background: rgba(6,182,212,0.1); padding: 20px; border-radius: 8px; border-left: 4px solid ${accentColor};">
+      <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 600; color: ${accentColor};">PAYMENT OPTIONS</p>
+      <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.6);">
+        <strong>Bank Transfer:</strong> Landbank • 1936-2091-96 • Jeff Edrick Martinez<br>
+        <strong>GCash:</strong> +63 951 916 7103<br>
+        <strong>PayPal:</strong> contact@jeffdev.studio
+      </p>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+    
+    <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
+      <strong>JD Studio</strong> • Enterprise Web Solutions<br>
+      DTI No: VLLP979818395984<br>
+      <a href="https://jeffdev.studio" style="color: ${accentColor}; text-decoration: none;">jeffdev.studio</a>
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
+

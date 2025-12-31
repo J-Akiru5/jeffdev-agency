@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Check, X, ExternalLink, Download } from 'lucide-react';
+import { ArrowLeft, Check, X, ExternalLink } from 'lucide-react';
 import { getInvoices } from '@/app/actions/invoice';
+import { InvoiceDownload } from '@/components/invoice/invoice-download';
 import type { Invoice, InvoiceStatus, PaymentRecord } from '@/types/invoice';
 
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,12 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex gap-2">
+          {/* Download PDF Button */}
+          <InvoiceDownload
+            invoice={invoice}
+            className="flex items-center gap-2 rounded-md bg-cyan-500/20 px-4 py-2 text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30"
+          />
+
           <Link
             href={`/pay/${invoice.refNo}`}
             target="_blank"
