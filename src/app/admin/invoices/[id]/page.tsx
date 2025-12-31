@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Check, X, ExternalLink } from 'lucide-react';
 import { getInvoices } from '@/app/actions/invoice';
 import { InvoiceDownload } from '@/components/invoice/invoice-download';
-import type { Invoice, InvoiceStatus, PaymentRecord } from '@/types/invoice';
+import type { InvoiceStatus, PaymentRecord } from '@/types/invoice';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,12 +70,12 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
           />
 
           <Link
-            href={`/pay/${invoice.refNo}`}
+            href={`/pay/${invoice.refNo}?preview=admin`}
             target="_blank"
             className="flex items-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:border-white/20 hover:text-white"
           >
             <ExternalLink className="h-4 w-4" />
-            View Payment Page
+            {invoice.status === 'draft' ? 'Preview Payment Page' : 'View Payment Page'}
           </Link>
         </div>
       </div>

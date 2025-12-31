@@ -31,13 +31,16 @@ export default function NewInvoicePage() {
   const [clientEmail, setClientEmail] = useState('');
   const [clientCompany, setClientCompany] = useState('');
   const [currency, setCurrency] = useState<Currency>('USD');
-  const [dueDate, setDueDate] = useState(
-    new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  );
+  const [dueDate, setDueDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 14);
+    return date.toISOString().split('T')[0];
+  });
   const [items, setItems] = useState<LineItem[]>([
     { id: '1', description: '', quantity: 1, unitPrice: 0, amount: 0 },
   ]);
   const [notes, setNotes] = useState('');
+  const [sendOnCreate, setSendOnCreate] = useState(true);
 
   const addItem = () => {
     setItems([
@@ -99,6 +102,7 @@ export default function NewInvoicePage() {
         dueDate,
         items,
         notes: notes.trim() || undefined,
+        sendOnCreate,
       });
 
       if (result.success) {
@@ -312,7 +316,20 @@ export default function NewInvoicePage() {
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-4">
+        <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center gap-2 mr-4">
+            <input
+              type="checkbox"
+              id="sendOnCreate"
+              checked={sendOnCreate}
+              onChange={(e) => setSendOnCreate(e.target.checked)}
+              className="h-4 w-4 rounded border-white/10 bg-white/5 text-cyan-500 focus:ring-cyan-500/20"
+            />
+            <label htmlFor="sendOnCreate" className="text-sm text-white/70 cursor-pointer select-none">
+              Send invoice via email immediately
+            </label>
+          </div>
+
           <Link
             href="/admin/invoices"
             className="rounded-md px-6 py-2 text-white/50 transition-colors hover:text-white"
@@ -325,7 +342,7 @@ export default function NewInvoicePage() {
             className="flex items-center gap-2 rounded-md bg-cyan-500/20 px-6 py-2 font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50"
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create Invoice
+            {sendOnCreate ? 'Create & Send Invoice' : 'Create Invoice'}
           </button>
         </div>
       </form>

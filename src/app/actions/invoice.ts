@@ -12,7 +12,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
 import { generateInvoiceRef, generatePaymentRef } from '@/lib/ref-generator';
 import { sendEmail, invoiceEmailTemplate, BRANDED_SENDER } from '@/lib/email';
-import type { Invoice, InvoiceStatus, PaymentRecord, PaymentMethod, Currency } from '@/types/invoice';
+import type { Invoice, InvoiceStatus, PaymentRecord } from '@/types/invoice';
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -39,6 +39,7 @@ const createInvoiceSchema = z.object({
   dueDate: z.string(),
   notes: z.string().optional(),
   termsAndConditions: z.string().optional(),
+  sendOnCreate: z.boolean().optional(),
 });
 
 const paymentSchema = z.object({
@@ -165,6 +166,11 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
       resourceId: docRef.id,
       details: { refNo: invoice.refNo, total, currency: invoice.currency },
     });
+
+    // Handle auto-send if requested
+    if (validated.sendOnCreate) {
+      await sendInvoice(docRef.id);
+    }
 
     revalidatePath('/admin/invoices');
 

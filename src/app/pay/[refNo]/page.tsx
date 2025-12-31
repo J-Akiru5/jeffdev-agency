@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ refNo: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const statusMessages: Record<InvoiceStatus, { title: string; description: string }> = {
@@ -25,13 +26,15 @@ const statusMessages: Record<InvoiceStatus, { title: string; description: string
   cancelled: { title: 'Invoice Cancelled', description: 'This invoice has been cancelled.' },
 };
 
-export default async function PublicPaymentPage({ params }: PageProps) {
+export default async function PublicPaymentPage({ params, searchParams }: PageProps) {
   const { refNo } = await params;
+  const { preview } = await searchParams;
   const invoice = await getInvoiceByRefNo(refNo);
 
   if (!invoice) notFound();
 
-  if (invoice.status === 'draft') {
+  // Show "Not Ready" screen if draft AND not in admin preview mode
+  if (invoice.status === 'draft' && preview !== 'admin') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-void p-6">
         <div className="text-center">
