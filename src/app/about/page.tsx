@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 };
 
 const stats = [
-  { label: 'Projects Delivered', value: '50+' },
-  { label: 'Years Experience', value: '5+' },
-  { label: 'Client Retention', value: '95%' },
+  { label: 'Niche Focus', value: 'Specialized' },
+  { label: 'Founder Exp', value: '5+' },
+  { label: 'Dedication', value: '100%' },
   { label: 'Uptime SLA', value: '99.9%' },
 ];
 
@@ -57,18 +57,18 @@ export default function AboutPage() {
                 <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                   We Build Systems
                   <br />
-                  <span className="text-gradient-holographic">That Scale</span>
+                  <span className="text-gradient-holographic">That Launch</span>
                 </h1>
                 <p className="mt-6 text-lg leading-relaxed text-white/60">
-                  JD Studio is a web development agency focused on building
-                  high-performance systems for ambitious startups and scaling
-                  enterprises. We don&apos;t just write code — we architect
-                  solutions that grow with your business.
+                  JeffDev Studio is a new-breed development agency architecting
+                  high-performance systems for ambitious startups. We don&apos;t
+                  just write code — we partner with founders to turn &apos;Zero
+                  to One&apos; ideas into scalable reality.
                 </p>
                 <p className="mt-4 text-white/50">
-                  Founded in 2020, we&apos;ve helped 50+ clients ship products
-                  that matter. From SaaS platforms to AI-powered applications,
-                  we bring enterprise-grade engineering to every project.
+                  Est. 2025. Built on 5+ years of the founder&apos;s hands-on
+                  experience shipping production systems across SaaS, AI, and
+                  enterprise platforms.
                 </p>
 
                 {/* Stats */}
