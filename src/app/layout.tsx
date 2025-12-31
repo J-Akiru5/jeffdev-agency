@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SmoothScroll } from '@/components/providers/smooth-scroll';
 import { CurrencyProvider } from '@/contexts/currency-context';
+import { FeatureFlagProvider } from '@/components/providers/feature-flag-provider';
+import { getFeatureFlags } from '@/lib/feature-flags';
 import { CookieConsent } from '@/components/cookie-consent';
 import { AnalyticsProvider } from '@/components/analytics-provider';
 import './globals.css';
@@ -96,11 +98,14 @@ export const metadata: Metadata = {
  * - Provides smooth scrolling via Lenis
  * - Renders the global grid/spotlight background
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch feature flags server-side
+  const featureFlags = await getFeatureFlags();
+
   return (
     <html
       lang="en"
@@ -134,11 +139,13 @@ export default function RootLayout({
 
         {/* Application Content */}
         <SmoothScroll>
-          <CurrencyProvider>
-            <div className="relative z-10 min-h-screen flex flex-col">
-              {children}
-            </div>
-          </CurrencyProvider>
+          <FeatureFlagProvider flags={featureFlags}>
+            <CurrencyProvider>
+              <div className="relative z-10 min-h-screen flex flex-col">
+                {children}
+              </div>
+            </CurrencyProvider>
+          </FeatureFlagProvider>
         </SmoothScroll>
 
         {/* Vercel Analytics - Web Vitals Tracking */}

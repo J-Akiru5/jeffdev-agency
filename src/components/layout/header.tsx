@@ -1,30 +1,46 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
 /**
  * Header Component
  * ----------------
  * Sticky glass navigation with:
  * - Logo/Brand mark
- * - Navigation links
+ * - Navigation links (feature-flag aware)
  * - Mobile menu
  * - "Get Quote" CTA (Ghost Glow style)
  */
 
-const navLinks = [
-  { href: '/services', label: 'Services' },
-  { href: '/work', label: 'Work' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
-];
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useFeatureFlags } from '@/components/providers/feature-flag-provider';
+
+interface NavLink {
+  href: string;
+  label: string;
+  highlight?: boolean;
+}
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { prismEngineEnabled, prismEngineTeaser } = useFeatureFlags();
+
+  // Build navigation links based on feature flags
+  const navLinks: NavLink[] = [
+    // Only show Pricing if Prism is enabled
+    ...(prismEngineEnabled ? [{ href: '/pricing', label: 'Pricing' }] : []),
+    // Show Prism teaser link if teaser is enabled but full Prism isn't
+    ...(!prismEngineEnabled && prismEngineTeaser
+      ? [{ href: '/prism', label: 'Prism Engine', highlight: true }]
+      : []),
+    { href: '/services', label: 'Services' },
+    { href: '/work', label: 'Work' },
+    { href: '/about', label: 'About' },
+    { href: '/contact', label: 'Contact' },
+  ];
 
   // Track scroll position for glass effect intensity
   useEffect(() => {
@@ -41,7 +57,7 @@ export function Header() {
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         isScrolled
-          ? 'bg-void/80 backdrop-blur-xl border-b border-white/[0.08]'
+          ? 'bg-void/80 backdrop-blur-xl border-b border-white/8'
           : 'bg-transparent'
       )}
     >
@@ -53,9 +69,11 @@ export function Header() {
             className="group flex items-center gap-2 transition-opacity hover:opacity-80"
           >
             <div className="relative h-8 w-8 overflow-hidden rounded-md">
-              <img
+              <Image
                 src="/favicon.svg"
                 alt="JD Studio"
+                width={32}
+                height={32}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -70,9 +88,20 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative px-4 py-2 text-sm text-white/70 transition-colors hover:text-white"
+                className={cn(
+                  'relative px-4 py-2 text-sm transition-colors',
+                  link.highlight
+                    ? 'flex items-center gap-1.5 text-purple-400 hover:text-purple-300'
+                    : 'text-white/70 hover:text-white'
+                )}
               >
+                {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
                 {link.label}
+                {link.highlight && (
+                  <span className="ml-1 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] uppercase">
+                    New
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -89,7 +118,7 @@ export function Header() {
                 <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </span>
               {/* Gradient overlay on hover */}
-              <div className="absolute inset-0 z-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="absolute inset-0 z-0 bg-linear-to-r from-cyan-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
 
             {/* Mobile Menu Toggle */}
@@ -111,8 +140,8 @@ export function Header() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          'overflow-hidden border-b border-white/[0.08] bg-void/95 backdrop-blur-xl transition-all duration-300 md:hidden',
-          isMobileMenuOpen ? 'max-h-80' : 'max-h-0 border-transparent'
+          'overflow-hidden border-b border-white/8 bg-void/95 backdrop-blur-xl transition-all duration-300 md:hidden',
+          isMobileMenuOpen ? 'max-h-96' : 'max-h-0 border-transparent'
         )}
       >
         <div className="space-y-1 px-6 py-4">
@@ -121,9 +150,20 @@ export function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block rounded-md px-4 py-3 text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+              className={cn(
+                'block rounded-md px-4 py-3 text-sm transition-colors hover:bg-white/5',
+                link.highlight
+                  ? 'flex items-center gap-2 text-purple-400'
+                  : 'text-white/70 hover:text-white'
+              )}
             >
+              {link.highlight && <Sparkles className="h-4 w-4" />}
               {link.label}
+              {link.highlight && (
+                <span className="ml-auto rounded bg-purple-500/20 px-2 py-0.5 text-[10px] uppercase">
+                  New
+                </span>
+              )}
             </Link>
           ))}
           <Link
