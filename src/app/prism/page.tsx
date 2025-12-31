@@ -64,7 +64,7 @@ export default function PrismPage() {
 
             {/* Cryptic Subtitle */}
             <p className="mt-4 text-xl text-white/30 md:text-2xl font-mono tracking-widest uppercase">
-              A new paradigm. 2025.
+              A new paradigm. 2026.
             </p>
 
             {/* Waitlist Form - Minimalist */}
